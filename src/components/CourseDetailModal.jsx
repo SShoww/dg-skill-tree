@@ -15,6 +15,7 @@ import { getPrepData } from '../data/coursePrepData';
 import { freeElectivesPool } from '../data/courses';
 import SyllabusTab from './SyllabusTab';
 import syllabusData from '../data/syllabusData.json';
+import courseDetails from '../data/courseDetails.json';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -87,8 +88,13 @@ export default function CourseDetailModal({
     }
   };
 
+  const details = courseDetails[displayCourse.code] || {};
+
   // Parse credits details (e.g., 3(1-4-4))
   const creditDetails = () => {
+    if (details.credits) {
+      return details.credits;
+    }
     const match = displayCourse.credits.match(/(\d)\((\d)-(\d)-(\d)\)/);
     if (match) {
       return {
@@ -369,16 +375,15 @@ export default function CourseDetailModal({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: '12px' }}>
                   {/* Course Description */}
                   {(() => {
-                    const syllabus = syllabusData[displayCourse.code];
-                    let descTh = null;
-                    let descEn = null;
-                    if (syllabus) {
-                      if (syllabus.description_th && !syllabus.description_th.includes("No syllabus data")) {
-                        descTh = syllabus.description_th;
-                      }
-                      if (syllabus.description_en && !syllabus.description_en.includes("No syllabus data")) {
-                        descEn = syllabus.description_en;
-                      }
+                    let descTh = details.descriptionTH;
+                    let descEn = details.descriptionEN;
+                    
+                    // Filter fallback placeholders
+                    if (descTh && (descTh.includes("ไม่มีข้อมูลคำอธิบายรายวิชา") || descTh === "")) {
+                      descTh = null;
+                    }
+                    if (descEn && (descEn.includes("No description available") || descEn === "")) {
+                      descEn = null;
                     }
                     
                     const hasSyllabusDesc = descTh || descEn;
@@ -402,29 +407,42 @@ export default function CourseDetailModal({
                             t('no_description')
                           ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px' }}>
-                              {descTh && (
+                              {descTh && descEn && descTh !== descEn && (
+                                <>
+                                  <div>
+                                    <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                                      {isTh ? 'ภาษาไทย (TH)' : 'Thai Description (TH)'}
+                                    </span>
+                                    <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descTh}</span>
+                                  </div>
+                                  <div>
+                                    <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                                      {isTh ? 'ภาษาอังกฤษ (EN)' : 'English Description (EN)'}
+                                    </span>
+                                    <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descEn}</span>
+                                  </div>
+                                </>
+                              )}
+                              
+                              {descTh && (!descEn || descTh === descEn) && (
                                 <div>
                                   <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
-                                    {isTh ? 'ภาษาไทย (TH)' : 'Thai Description (TH)'}
+                                    {isTh ? 'คำอธิบายลักษณะกระบวนวิชา' : 'Course Description'}
                                   </span>
                                   <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descTh}</span>
                                 </div>
                               )}
                               
-                              {descEn && (
+                              {!descTh && descEn && (
                                 <div>
                                   <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
-                                    {isTh ? 'ภาษาอังกฤษ (EN)' : 'English Description (EN)'}
+                                    {isTh ? 'คำอธิบายลักษณะกระบวนวิชา (EN)' : 'Course Description (EN)'}
                                   </span>
                                   <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descEn}</span>
                                 </div>
                               )}
                               
-                              {!hasSyllabusDesc && displayCourse.description && (
-                                <div>{displayCourse.description}</div>
-                              )}
-                              
-                              {!hasSyllabusDesc && !displayCourse.description && (
+                              {!hasSyllabusDesc && (
                                 <span style={{ color: '#64748b', fontStyle: 'italic' }}>{t('no_description')}</span>
                               )}
                             </div>
@@ -470,7 +488,7 @@ export default function CourseDetailModal({
                     </Title>
                     
                     <Paragraph style={{ fontSize: '12.5px', color: '#4c1d95', fontWeight: 500, lineHeight: 1.5, marginBottom: '16px' }}>
-                      {prepData.prep}
+                      {details.advisingTips || prepData.prep}
                     </Paragraph>
 
                     <Row gutter={[16, 16]}>
