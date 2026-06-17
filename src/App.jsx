@@ -20,7 +20,7 @@ import {
 import enUS from 'antd/locale/en_US';
 import thTH from 'antd/locale/th_TH';
 import { useTranslation } from './context/LanguageContext';
-import { coursesData } from './data/courses';
+import { coursesData, freeElectivesPool } from './data/courses';
 import { TRACK_ELECTIVES } from './constants/trackElectives';
 import { careerPaths } from './data/careers';
 import CreditTracker from './components/CreditTracker';
@@ -83,6 +83,9 @@ export default function App() {
   // 4.4 State: Selected Major Electives mapping
   const [selectedMajorElectives, setSelectedMajorElectives] = useState({});
 
+  // 4.6 State: Selected Free Electives mapping
+  const [selectedFreeElectives, setSelectedFreeElectives] = useState({});
+
   // 4.5 State: Drawer visibility and active slot target
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeSlotTarget, setActiveSlotTarget] = useState(null);
@@ -127,6 +130,7 @@ export default function App() {
         if (parsed.careerFocus !== undefined) setCareerFocus(parsed.careerFocus);
         if (parsed.selectedGeElectives) setSelectedGeElectives(parsed.selectedGeElectives);
         if (parsed.selectedMajorElectives) setSelectedMajorElectives(parsed.selectedMajorElectives);
+        if (parsed.selectedFreeElectives) setSelectedFreeElectives(parsed.selectedFreeElectives);
       } catch (e) {
         console.error("Error loading localStorage state:", e);
       }
@@ -144,12 +148,13 @@ export default function App() {
         careerFocus,
         selectedGeElectives,
         selectedMajorElectives,
+        selectedFreeElectives,
       };
       localStorage.setItem('cmu_dg_planner_state', JSON.stringify(stateToSave));
     }, 300);
 
     return () => clearTimeout(handler);
-  }, [completedCourses, careerFocus, selectedGeElectives, selectedMajorElectives, isInitialLoadComplete]);
+  }, [completedCourses, careerFocus, selectedGeElectives, selectedMajorElectives, selectedFreeElectives, isInitialLoadComplete]);
 
   // 5. Calculate unlocked courses based on prerequisites
   const getUnlockedCourses = useCallback(() => {
@@ -162,6 +167,9 @@ export default function App() {
       } else if (course.code.startsWith('GE-EL-') && selectedGeElectives[course.code]) {
         const assignedCode = selectedGeElectives[course.code];
         targetCourse = coursesData.find(c => c.code === assignedCode) || course;
+      } else if (course.code.startsWith('FE-EL-') && selectedFreeElectives[course.code]) {
+        const assignedCode = selectedFreeElectives[course.code];
+        targetCourse = coursesData.find(c => c.code === assignedCode) || freeElectivesPool.find(c => c.code === assignedCode) || course;
       }
 
       if (targetCourse.prereqs.length === 0) {
@@ -179,7 +187,7 @@ export default function App() {
         return hasAll ? course.code : null;
       }
     }).filter(Boolean);
-  }, [completedCourses, selectedMajorElectives, selectedGeElectives]);
+  }, [completedCourses, selectedMajorElectives, selectedGeElectives, selectedFreeElectives]);
 
   const unlockedCourses = useMemo(() => {
     return getUnlockedCourses();
@@ -187,7 +195,7 @@ export default function App() {
 
   // Helper to find missing prerequisite course codes for a specific course
   const getMissingPrereqs = useCallback((courseCode) => {
-    let targetCourse = coursesData.find(c => c.code === courseCode);
+    let targetCourse = coursesData.find(c => c.code === courseCode) || freeElectivesPool.find(c => c.code === courseCode);
     if (!targetCourse) return { missing: [], isOr: false };
 
     if (courseCode.startsWith('MJ-EL-') && selectedMajorElectives[courseCode]) {
@@ -196,6 +204,9 @@ export default function App() {
     } else if (courseCode.startsWith('GE-EL-') && selectedGeElectives[courseCode]) {
       const assignedCode = selectedGeElectives[courseCode];
       targetCourse = coursesData.find(c => c.code === assignedCode) || targetCourse;
+    } else if (courseCode.startsWith('FE-EL-') && selectedFreeElectives[courseCode]) {
+      const assignedCode = selectedFreeElectives[courseCode];
+      targetCourse = coursesData.find(c => c.code === assignedCode) || freeElectivesPool.find(c => c.code === assignedCode) || targetCourse;
     }
 
     if (targetCourse.prereqs.length === 0) {
@@ -216,7 +227,7 @@ export default function App() {
     }
 
     return { missing, isOr };
-  }, [completedCourses, selectedMajorElectives, selectedGeElectives]);
+  }, [completedCourses, selectedMajorElectives, selectedGeElectives, selectedFreeElectives]);
 
   // Toggle course completion status
   const handleToggleComplete = (courseCode) => {
@@ -305,6 +316,32 @@ export default function App() {
     }
   };
 
+  // Handle Free Elective selection
+  const handleSelectFreeElective = (slotCode, courseCode) => {
+    setSelectedFreeElectives(prev => {
+      const updated = { ...prev };
+      if (courseCode) {
+        updated[slotCode] = courseCode;
+      } else {
+        delete updated[slotCode];
+        setCompletedCourses(curr => curr.filter(code => code !== slotCode));
+      }
+      return updated;
+    });
+
+    if (courseCode) {
+      const course = coursesData.find(c => c.code === courseCode) || freeElectivesPool.find(c => c.code === courseCode);
+      notification.success({
+        message: language === 'th' ? 'เลือกวิชาเลือกเสรีสำเร็จ' : 'Free Elective Assigned',
+        description: language === 'th'
+          ? `ลงทะเบียนวิชา ${course ? course.title_th : courseCode} ลงในช่อง ${slotCode} สำเร็จ`
+          : `Successfully assigned ${course ? course.title_en : courseCode} to slot ${slotCode}.`,
+        placement: 'bottomRight',
+        duration: 3
+      });
+    }
+  };
+
   // Calculate accumulated credits per category
   const getCompletedCredits = () => {
     const summary = {
@@ -316,7 +353,7 @@ export default function App() {
     };
 
     completedCourses.forEach(code => {
-      const course = coursesData.find(c => c.code === code);
+      const course = coursesData.find(c => c.code === code) || freeElectivesPool.find(c => c.code === code);
       if (course) {
         const cat = course.category;
         if (cat === 'GE_Required' || cat === 'GE_Elective') {
@@ -353,6 +390,7 @@ export default function App() {
       setSelectedCourseCode(null);
       setSelectedGeElectives({});
       setSelectedMajorElectives({});
+      setSelectedFreeElectives({});
       setCareerFocus(null);
 
       notification.success({
@@ -859,6 +897,8 @@ export default function App() {
                 onSelectGeElective={handleSelectGeElective}
                 selectedMajorElectives={selectedMajorElectives}
                 onSelectMajorElective={handleSelectMajorElective}
+                selectedFreeElectives={selectedFreeElectives}
+                onSelectFreeElective={handleSelectFreeElective}
                 onAddMajorElectiveSlotClick={handleAddMajorElectiveSlotClick}
                 hoveredCourseCode={hoveredCourseCode}
                 setHoveredCourseCode={setHoveredCourseCode}
@@ -880,6 +920,8 @@ export default function App() {
                 onSelectGeElective={handleSelectGeElective}
                 selectedMajorElectives={selectedMajorElectives}
                 onSelectMajorElective={handleSelectMajorElective}
+                selectedFreeElectives={selectedFreeElectives}
+                onSelectFreeElective={handleSelectFreeElective}
                 onAddMajorElectiveSlotClick={handleAddMajorElectiveSlotClick}
                 hoveredCourseCode={hoveredCourseCode}
                 setHoveredCourseCode={setHoveredCourseCode}
@@ -915,6 +957,8 @@ export default function App() {
             onSelectGeElective={handleSelectGeElective}
             selectedMajorElectives={selectedMajorElectives}
             onSelectMajorElective={handleSelectMajorElective}
+            selectedFreeElectives={selectedFreeElectives}
+            onSelectFreeElective={handleSelectFreeElective}
             onAddMajorElectiveSlotClick={handleAddMajorElectiveSlotClick}
           />
         )}

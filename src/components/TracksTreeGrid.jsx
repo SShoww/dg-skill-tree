@@ -170,6 +170,8 @@ const CourseNode = ({ data }) => {
         onSelectGeElective={data.onSelectGeElective}
         selectedMajorElectives={data.selectedMajorElectives}
         onSelectMajorElective={data.onSelectMajorElective}
+        selectedFreeElectives={data.selectedFreeElectives}
+        onSelectFreeElective={data.onSelectFreeElective}
         onHoverStart={data.onHoverStart}
         onHoverEnd={data.onHoverEnd}
         highlightType={data.highlightType}
@@ -308,6 +310,8 @@ export default function TracksTreeGrid({
   onSelectGeElective,
   selectedMajorElectives = {},
   onSelectMajorElective,
+  selectedFreeElectives = {},
+  onSelectFreeElective,
   onAddMajorElectiveSlotClick,
   hoveredCourseCode,
   setHoveredCourseCode,
@@ -638,6 +642,8 @@ export default function TracksTreeGrid({
               onSelectGeElective,
               selectedMajorElectives,
               onSelectMajorElective,
+              selectedFreeElectives,
+              onSelectFreeElective,
               onHoverStart: (code) => { if (!isTouchDevice) setHoveredCourseCode(code); },
               onHoverEnd: () => { if (!isTouchDevice) setHoveredCourseCode(null); },
               highlightType,
@@ -671,6 +677,8 @@ export default function TracksTreeGrid({
     onSelectGeElective,
     selectedMajorElectives,
     onSelectMajorElective,
+    selectedFreeElectives,
+    onSelectFreeElective,
     onAddMajorElectiveSlotClick,
     setHoveredCourseCode,
     activeFocusCode,

@@ -7,7 +7,7 @@ import {
   InfoCircleOutlined
 } from '@ant-design/icons';
 import { useTranslation } from '../context/LanguageContext';
-import { coursesData } from '../data/courses';
+import { coursesData, freeElectivesPool } from '../data/courses';
 
 export default function CourseCard({ 
   course, 
@@ -24,6 +24,7 @@ export default function CourseCard({
   onToggleComplete,
   selectedGeElectives = {},
   selectedMajorElectives = {},
+  selectedFreeElectives = {},
   // Hover pathway highlights
   onHoverStart,
   onHoverEnd,
@@ -40,8 +41,13 @@ export default function CourseCard({
   const isMajorElectiveSlot = course.category === 'Major_Elective' && course.code.startsWith('MJ-EL-');
   const selectedMajorSubCode = isMajorElectiveSlot ? selectedMajorElectives[course.code] : null;
 
-  const selectedSubCode = selectedGeSubCode || selectedMajorSubCode;
-  const displayCourse = selectedSubCode ? coursesData.find(c => c.code === selectedSubCode) : course;
+  const isFreeElectiveSlot = course.category === 'Free_Elective' && course.code.startsWith('FE-EL-');
+  const selectedFreeSubCode = isFreeElectiveSlot ? selectedFreeElectives[course.code] : null;
+
+  const selectedSubCode = selectedGeSubCode || selectedMajorSubCode || selectedFreeSubCode;
+  const displayCourse = selectedSubCode 
+    ? (coursesData.find(c => c.code === selectedSubCode) || freeElectivesPool.find(c => c.code === selectedSubCode)) 
+    : course;
   const displayTitle = isTh ? displayCourse.title_th : displayCourse.title_en;
 
   const isElectiveSlot = course.code.includes('-EL-') || (course.year === null && course.semester === null);
@@ -54,6 +60,9 @@ export default function CourseCard({
     }
     if (isGeElectiveSlot && selectedGeSubCode) {
       return { borderLColor: '#a855f7', bgColor: '#faf5ff', tagColor: 'purple' };
+    }
+    if (isFreeElectiveSlot && selectedFreeSubCode) {
+      return { borderLColor: '#f59e0b', bgColor: '#fffbeb', tagColor: 'warning' };
     }
     switch (category) {
       case 'GE_Required': 
@@ -237,7 +246,7 @@ export default function CourseCard({
                 {displayCourse.credits.split('(')[0]} {t('card_cr')}
               </span>
 
-              {(!isElectiveSlot || ((isGeElectiveSlot || isMajorElectiveSlot) && selectedSubCode)) && (
+              {(!isElectiveSlot || ((isGeElectiveSlot || isMajorElectiveSlot || isFreeElectiveSlot) && selectedSubCode)) && (
                 <Checkbox
                   checked={isCompleted}
                   disabled={!isUnlocked && !isCompleted}

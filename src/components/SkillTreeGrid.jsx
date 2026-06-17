@@ -23,6 +23,8 @@ export default function SkillTreeGrid({
   onSelectGeElective,
   selectedMajorElectives = {},
   onSelectMajorElective,
+  selectedFreeElectives = {},
+  onSelectFreeElective,
   onAddMajorElectiveSlotClick,
   hoveredCourseCode,
   setHoveredCourseCode,
@@ -460,6 +462,8 @@ export default function SkillTreeGrid({
                               onSelectGeElective={onSelectGeElective}
                               selectedMajorElectives={selectedMajorElectives}
                               onSelectMajorElective={onSelectMajorElective}
+                              selectedFreeElectives={selectedFreeElectives}
+                              onSelectFreeElective={onSelectFreeElective}
                               onHoverStart={(code) => { if (!isTouchDevice) setHoveredCourseCode(code); }}
                               onHoverEnd={() => { if (!isTouchDevice) setHoveredCourseCode(null); }}
                               highlightType={highlightType}
@@ -631,6 +635,8 @@ export default function SkillTreeGrid({
                                onSelectGeElective={onSelectGeElective}
                                selectedMajorElectives={selectedMajorElectives}
                                onSelectMajorElective={onSelectMajorElective}
+                               selectedFreeElectives={selectedFreeElectives}
+                               onSelectFreeElective={onSelectFreeElective}
                                onHoverStart={(code) => { if (!isTouchDevice) setHoveredCourseCode(code); }}
                                onHoverEnd={() => { if (!isTouchDevice) setHoveredCourseCode(null); }}
                                highlightType={highlightType}

@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons';
 import { useTranslation } from '../context/LanguageContext';
 import { getPrepData } from '../data/coursePrepData';
+import { freeElectivesPool } from '../data/courses';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -28,6 +29,8 @@ export default function CourseDetailModal({
   onSelectGeElective,
   selectedMajorElectives = {},
   onSelectMajorElective,
+  selectedFreeElectives = {},
+  onSelectFreeElective,
   onAddMajorElectiveSlotClick
 }) {
   const { language, t } = useTranslation();
@@ -41,8 +44,13 @@ export default function CourseDetailModal({
   const isMajorElectiveSlot = course.category === 'Major_Elective' && course.code.startsWith('MJ-EL-');
   const selectedMajorSubCode = isMajorElectiveSlot ? selectedMajorElectives[course.code] : null;
 
-  const selectedSubCode = selectedGeSubCode || selectedMajorSubCode;
-  const displayCourse = selectedSubCode ? allCourses.find(c => c.code === selectedSubCode) : course;
+  const isFreeElectiveSlot = course.category === 'Free_Elective' && course.code.startsWith('FE-EL-');
+  const selectedFreeSubCode = isFreeElectiveSlot ? selectedFreeElectives[course.code] : null;
+
+  const selectedSubCode = selectedGeSubCode || selectedMajorSubCode || selectedFreeSubCode;
+  const displayCourse = selectedSubCode 
+    ? (allCourses.find(c => c.code === selectedSubCode) || freeElectivesPool.find(c => c.code === selectedSubCode)) 
+    : course;
 
   // Find post-requisites: courses that have this course code in their prereqs
   const postReqs = allCourses.filter(c => c.prereqs.includes(course.code));
@@ -117,19 +125,19 @@ export default function CourseDetailModal({
         <Button key="close" onClick={onClose} style={{ borderRadius: '8px' }}>
           {t('modal_close')}
         </Button>,
-        (!course.code.includes('-EL-') || isGeElectiveSlot || isMajorElectiveSlot) && (
+        (!course.code.includes('-EL-') || isGeElectiveSlot || isMajorElectiveSlot || isFreeElectiveSlot) && (
           <Button
             key="complete"
             type={isCompleted ? 'default' : 'primary'}
             danger={isCompleted}
             icon={isCompleted ? <CloseOutlined /> : <CheckOutlined />}
             onClick={() => onToggleComplete(course.code)}
-            disabled={(!isUnlocked && !isCompleted) || ((isGeElectiveSlot || isMajorElectiveSlot) && !selectedSubCode)}
+            disabled={(!isUnlocked && !isCompleted) || ((isGeElectiveSlot || isMajorElectiveSlot || isFreeElectiveSlot) && !selectedSubCode)}
             style={{ 
               borderRadius: '8px', 
               fontWeight: 700,
-              backgroundColor: !isCompleted && isUnlocked && (!isGeElectiveSlot && !isMajorElectiveSlot || selectedSubCode) ? '#4f46e5' : undefined,
-              borderColor: !isCompleted && isUnlocked && (!isGeElectiveSlot && !isMajorElectiveSlot || selectedSubCode) ? '#4f46e5' : undefined,
+              backgroundColor: !isCompleted && isUnlocked && (!isGeElectiveSlot && !isMajorElectiveSlot && !isFreeElectiveSlot || selectedSubCode) ? '#4f46e5' : undefined,
+              borderColor: !isCompleted && isUnlocked && (!isGeElectiveSlot && !isMajorElectiveSlot && !isFreeElectiveSlot || selectedSubCode) ? '#4f46e5' : undefined,
             }}
           >
             {isCompleted ? t('modal_mark_incomplete') : t('modal_mark_complete')}
@@ -139,6 +147,85 @@ export default function CourseDetailModal({
       style={{ borderRadius: '16px', overflow: 'hidden' }}
     >
       <div style={{ marginTop: '16px', maxHeight: '60vh', overflowY: 'auto', paddingRight: '6px' }}>
+        {/* Free Elective Dropdown Selector in Modal */}
+        {isFreeElectiveSlot && (
+          <div style={{ background: '#fffbeb', padding: '16px', borderRadius: '12px', border: '1px solid #fef3c7', marginBottom: '20px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: '#d97706', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+              {isTh ? 'เลือกวิชาเลือกเสรี' : 'Select Free Elective Course'}
+            </span>
+            <Select
+              showSearch
+              placeholder={isTh ? 'ค้นหาและเลือกวิชาเลือกเสรี...' : 'Search and select free elective...'}
+              optionFilterProp="children"
+              filterOption={(input, option) => {
+                const text = String(option.children || '').toLowerCase();
+                return text.includes(input.toLowerCase());
+              }}
+              value={selectedSubCode || undefined}
+              onChange={(val) => onSelectFreeElective(course.code, val || null)}
+              style={{ width: '100%', marginBottom: '12px' }}
+              allowClear
+              dropdownMatchSelectWidth={false}
+              dropdownRender={menu => (
+                <>
+                  {menu}
+                  <Divider style={{ margin: '8px 0' }} />
+                  <div style={{ padding: '0 8px 4px 8px', display: 'flex', justifyContent: 'center' }}>
+                    <a 
+                      href="https://cmu-review.vercel.app/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <CompassOutlined /> {isTh ? 'ดูรีวิววิชาที่ cmu-review.vercel.app' : 'See course reviews at cmu-review.vercel.app'}
+                    </a>
+                  </div>
+                </>
+              )}
+            >
+              {(() => {
+                const combinedPool = [
+                  ...freeElectivesPool,
+                  ...allCourses.filter(c => !c.code.includes('-EL-'))
+                ];
+                const uniquePool = Array.from(new Map(combinedPool.map(c => [c.code, c])).values());
+                const selectedElsewhere = Object.entries(selectedFreeElectives)
+                  .filter(([slot]) => slot !== course.code)
+                  .map(([, subCode]) => subCode);
+                
+                return uniquePool.map(opt => (
+                  <Select.Option 
+                    key={opt.code} 
+                    value={opt.code}
+                    disabled={selectedElsewhere.includes(opt.code)}
+                  >
+                    {opt.code} - {isTh ? opt.title_th : opt.title_en} ({opt.dept_code})
+                  </Select.Option>
+                ));
+              })()}
+            </Select>
+            
+            {/* Banner recommendation link */}
+            <div style={{ background: '#fffbeb', border: '1px dashed #fbbf24', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ fontSize: '20px' }}>💡</div>
+              <div style={{ flex: 1 }}>
+                <Text style={{ fontSize: '12.5px', color: '#b45309', fontWeight: 600, display: 'block' }}>
+                  {isTh ? 'ไม่แน่ใจว่าจะลงวิชาไหนดีใช่ไหม?' : 'Not sure which course to pick?'}
+                </Text>
+                <a 
+                  href="https://cmu-review.vercel.app/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}
+                >
+                  {isTh ? 'ไปค้นหารีวิววิชาและอ่านประสบการณ์จากรุ่นพี่ได้ที่ cmu-review.vercel.app ↗' : 'Find course reviews and senior feedback on cmu-review.vercel.app ↗'}
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* GE Elective Dropdown Selector in Modal */}
         {isGeElectiveSlot && (
           <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
