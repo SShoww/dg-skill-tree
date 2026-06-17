@@ -702,9 +702,10 @@ export default function TracksTreeGrid({
   // 3. Generate Edges for React Flow
   const edges = useMemo(() => {
     const list = [];
-    allStudyPlanCourses.forEach(course => {
+    courses.forEach(course => {
+      if (!course.prereqs) return;
       course.prereqs.forEach(preCode => {
-        const hasPreNode = allStudyPlanCourses.some(c => c.code === preCode);
+        const hasPreNode = courses.some(c => c.code === preCode);
         if (hasPreNode) {
           let strokeColor = '#cbd5e1';
           let strokeWidth = 2;
@@ -771,7 +772,7 @@ export default function TracksTreeGrid({
       });
     });
     return list;
-  }, [allStudyPlanCourses, activeFocusCode, activePredecessors, activeSuccessors, activeChain, careerFocus, careerRecommendedCodes]);
+  }, [courses, activeFocusCode, activePredecessors, activeSuccessors, activeChain, careerFocus, careerRecommendedCodes]);
 
   // Viewport Zoom helper controls
   const handleZoomIn = () => reactFlowInstance && reactFlowInstance.zoomIn();
