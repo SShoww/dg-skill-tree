@@ -139,6 +139,8 @@ export default function SkillTreeGrid({
           const x2 = selRect.left - svgRect.left - 10; // Offset slightly for arrowhead
           const y2 = selRect.top + selRect.height / 2 - svgRect.top;
           
+          const isSameLevel = Math.abs(y2 - y1) < 10;
+
           // Determine connection type:
           // If the course is a successor of the active focus, or the prereq is the active focus itself, it's an unlock path (Green).
           // Otherwise, it's part of the prerequisite ancestry path (Red).
@@ -151,6 +153,7 @@ export default function SkillTreeGrid({
             id: `line-sem-${preCode}-${course.code}`,
             x1, y1, x2, y2,
             type,
+            isSameLevel,
             title: type === 'prereq' ? `Requires: ${preCode}` : `Unlocks: ${course.dept_code}`
           });
         }
@@ -165,7 +168,8 @@ export default function SkillTreeGrid({
             conn.y1 === newConnections[i].y1 && 
             conn.x2 === newConnections[i].x2 && 
             conn.y2 === newConnections[i].y2 &&
-            conn.type === newConnections[i].type
+            conn.type === newConnections[i].type &&
+            conn.isSameLevel === newConnections[i].isSameLevel
           )
       ) {
         return prev;
@@ -212,7 +216,30 @@ export default function SkillTreeGrid({
     const dy = y2 - y1;
     
     if (Math.abs(dy) < 10) {
-      return `M ${x1} ${y1} L ${x2} ${y2}`;
+      // Same-Level Bridge Arch Routing
+      const L_stub = 20; // 20px straight horizontal out/in stubs
+      const h_arc = 35;  // 35px height lift for the arch
+      
+      const x1_stub = x1 + L_stub;
+      const x2_stub = x2 - L_stub;
+
+      // First cubic curve control points
+      const cp1x = x1_stub + (xMid - x1_stub) / 2;
+      const cp1y = y1;
+      const cp2x = xMid - (xMid - x1_stub) / 2;
+      const cp2y = y1 - h_arc;
+
+      // Second cubic curve control points
+      const cp3x = xMid + (x2_stub - xMid) / 2;
+      const cp3y = y2 - h_arc;
+      const cp4x = x2_stub - (x2_stub - xMid) / 2;
+      const cp4y = y2;
+
+      return `M ${x1} ${y1} ` +
+             `L ${x1_stub} ${y1} ` +
+             `C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${xMid} ${y1 - h_arc} ` +
+             `C ${cp3x} ${cp3y}, ${cp4x} ${cp4y}, ${x2_stub} ${y2} ` +
+             `L ${x2} ${y2}`;
     }
     
     const dirY = dy > 0 ? 1 : -1;
@@ -465,6 +492,7 @@ export default function SkillTreeGrid({
                     filter={line.type === 'prereq' ? 'url(#glow-red-s)' : 'url(#glow-green-s)'}
                     markerEnd={line.type === 'prereq' ? 'url(#arrow-red-s)' : 'url(#arrow-green-s)'}
                     className="transition-all duration-300 stroke-dash"
+                    style={line.isSameLevel ? { strokeDasharray: '6, 4' } : undefined}
                     title={line.title}
                   />
                 ))}
