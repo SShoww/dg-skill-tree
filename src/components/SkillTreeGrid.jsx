@@ -416,7 +416,7 @@ export default function SkillTreeGrid({
         ) : (
           <div 
             ref={containerRef}
-            className="relative overflow-x-auto pb-4 scroll-smooth"
+            className="relative overflow-x-auto pb-12 scroll-smooth"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             {/* SVG Overlay */}

@@ -157,7 +157,7 @@ export default function CourseCard({
     <Tooltip 
       title={tooltipContent} 
       mouseEnterDelay={0.4} 
-      overlayStyle={{ zIndex: 1000 }}
+      overlayStyle={{ zIndex: 1000, pointerEvents: 'none' }}
     >
       <div 
         onClick={onClick}
