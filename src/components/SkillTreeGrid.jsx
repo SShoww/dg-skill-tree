@@ -208,14 +208,41 @@ export default function SkillTreeGrid({
   }, [updateConnectionLines, completedCourses, unlockedCourses, windowWidth, activeFocusCode]);
 
   const getCurvePath = (x1, y1, x2, y2) => {
-    const actualDx = x2 - x1;
-    const direction = actualDx >= 0 ? 1 : -1;
-    const controlDx = Math.max(Math.abs(actualDx), 120) * direction;
-    const cx1 = x1 + controlDx * 0.45;
-    const cy1 = y1;
-    const cx2 = x2 - controlDx * 0.45;
-    const cy2 = y2;
-    return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
+    const xMid = (x1 + x2) / 2;
+    const dy = y2 - y1;
+    
+    if (Math.abs(dy) < 10) {
+      return `M ${x1} ${y1} L ${x2} ${y2}`;
+    }
+    
+    const dirY = dy > 0 ? 1 : -1;
+    const dirX = x2 > x1 ? 1 : -1;
+    
+    const R = 24; // Generous corner radius for smooth step routing
+    const r = Math.min(R, Math.abs(xMid - x1), Math.abs(dy) / 2);
+    
+    if (r <= 2) {
+      return `M ${x1} ${y1} L ${xMid} ${y1} L ${xMid} ${y2} L ${x2} ${y2}`;
+    }
+    
+    const p1_x = xMid - r * dirX;
+    const p1_y = y1;
+    
+    const p2_x = xMid;
+    const p2_y = y1 + r * dirY;
+    
+    const p3_x = xMid;
+    const p3_y = y2 - r * dirY;
+    
+    const p4_x = xMid + r * dirX;
+    const p4_y = y2;
+    
+    return `M ${x1} ${y1} ` +
+           `L ${p1_x} ${p1_y} ` +
+           `Q ${xMid} ${y1} ${p2_x} ${p2_y} ` +
+           `L ${p3_x} ${p3_y} ` +
+           `Q ${xMid} ${y2} ${p4_x} ${p4_y} ` +
+           `L ${x2} ${y2}`;
   };
 
   const handleContainerClick = (e) => {
@@ -230,7 +257,7 @@ export default function SkillTreeGrid({
   return (
     <div className="space-y-8" onClick={handleContainerClick}>
       {/* Semester Grid Timeline */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+      <div className="bg-transparent border-0 shadow-none p-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <Title level={4} style={{ margin: 0, fontWeight: 800, color: '#1e293b' }} className="flex items-center gap-2">
@@ -335,7 +362,7 @@ export default function SkillTreeGrid({
                               key={course.code} 
                               onClick={() => onAddMajorElectiveSlotClick && onAddMajorElectiveSlotClick(course.code)}
                               className="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer transition-all duration-200"
-                              style={{ height: '82px', userSelect: 'none' }}
+                              style={{ height: '120px', userSelect: 'none' }}
                             >
                               <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <PlusOutlined style={{ fontSize: '11px' }} /> {isTh ? 'วิชาเอกเลือก' : 'Major Elective'}
@@ -376,6 +403,7 @@ export default function SkillTreeGrid({
                               onHoverEnd={() => { if (!isTouchDevice) setHoveredCourseCode(null); }}
                               highlightType={highlightType}
                               isDimmed={isDimmed}
+                              isTimeline={true}
                             />
                           </div>
                         );
@@ -389,62 +417,63 @@ export default function SkillTreeGrid({
         ) : (
           <div 
             ref={containerRef}
-            className="relative overflow-x-auto pb-12 scroll-smooth"
+            className="relative overflow-x-auto pb-12 scroll-smooth scrollbar-none"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
-            {/* SVG Overlay */}
-            <svg 
-              ref={svgRef}
-              className="absolute pointer-events-none"
-              style={{ 
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                zIndex: 999,
-                minWidth: '1800px',
-                overflow: 'visible'
-              }}
-            >
-              <defs>
-                <filter id="glow-red-s" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="3.5" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-                <filter id="glow-green-s" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="3.5" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
+            <div className="relative" style={{ minWidth: '1880px', width: '100%' }}>
+              {/* SVG Overlay */}
+              <svg 
+                ref={svgRef}
+                className="absolute pointer-events-none"
+                style={{ 
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  zIndex: 999,
+                  minWidth: '1880px',
+                  overflow: 'visible'
+                }}
+              >
+                <defs>
+                  <filter id="glow-red-s" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3.5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                  <filter id="glow-green-s" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3.5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                  
+                  {/* Arrowhead Markers */}
+                  <marker id="arrow-red-s" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L6,3 Z" fill="#ef4444" />
+                  </marker>
+                  <marker id="arrow-green-s" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L6,3 Z" fill="#10b981" />
+                  </marker>
+                </defs>
                 
-                {/* Arrowhead Markers */}
-                <marker id="arrow-red-s" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
-                  <path d="M0,0 L0,6 L6,3 Z" fill="#ef4444" />
-                </marker>
-                <marker id="arrow-green-s" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
-                  <path d="M0,0 L0,6 L6,3 Z" fill="#10b981" />
-                </marker>
-              </defs>
-              
-              {connections.map(line => (
-                <path
-                  key={line.id}
-                  d={getCurvePath(line.x1, line.y1, line.x2, line.y2)}
-                  fill="none"
-                  stroke={line.type === 'prereq' ? '#ef4444' : '#10b981'}
-                  strokeWidth={3.5}
-                  filter={line.type === 'prereq' ? 'url(#glow-red-s)' : 'url(#glow-green-s)'}
-                  markerEnd={line.type === 'prereq' ? 'url(#arrow-red-s)' : 'url(#arrow-green-s)'}
-                  className="transition-all duration-300 stroke-dash"
-                  title={line.title}
-                />
-              ))}
-            </svg>
+                {connections.map(line => (
+                  <path
+                    key={line.id}
+                    d={getCurvePath(line.x1, line.y1, line.x2, line.y2)}
+                    fill="none"
+                    stroke={line.type === 'prereq' ? '#ef4444' : '#10b981'}
+                    strokeWidth={3.5}
+                    filter={line.type === 'prereq' ? 'url(#glow-red-s)' : 'url(#glow-green-s)'}
+                    markerEnd={line.type === 'prereq' ? 'url(#arrow-red-s)' : 'url(#arrow-green-s)'}
+                    className="transition-all duration-300 stroke-dash"
+                    title={line.title}
+                  />
+                ))}
+              </svg>
 
-            {/* 8 Columns Grid */}
-            <div 
-              className="grid grid-cols-8 gap-8 relative z-10"
-              style={{ minWidth: '1800px' }}
-            >
+              {/* 8 Columns Grid */}
+              <div 
+                className="grid grid-cols-8 gap-8 relative z-10 pr-12"
+                style={{ minWidth: '1880px' }}
+              >
               {semesters.map((sem, idx) => {
                 const semCourses = studyPlanCourses.filter(
                   c => c.year === sem.year && c.semester === sem.semester
@@ -503,7 +532,7 @@ export default function SkillTreeGrid({
                               id={`course-card-${course.code}`}
                               onClick={() => onAddMajorElectiveSlotClick && onAddMajorElectiveSlotClick(course.code)}
                               className="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer transition-all duration-200"
-                              style={{ height: '82px', userSelect: 'none' }}
+                              style={{ height: '120px', width: '200px', userSelect: 'none' }}
                             >
                               <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <PlusOutlined style={{ fontSize: '11px' }} /> {isTh ? 'วิชาเอกเลือก' : 'Major Elective'}
@@ -544,6 +573,7 @@ export default function SkillTreeGrid({
                                onHoverEnd={() => { if (!isTouchDevice) setHoveredCourseCode(null); }}
                                highlightType={highlightType}
                                isDimmed={isDimmed}
+                               isTimeline={true}
                             />
                           </div>
                         );
@@ -554,6 +584,7 @@ export default function SkillTreeGrid({
               })}
             </div>
           </div>
+        </div>
         )}
       </div>
     </div>

@@ -28,7 +28,8 @@ export default function CourseCard({
   onHoverStart,
   onHoverEnd,
   highlightType, // 'selected' | 'prereq' | 'unlock' | null
-  isDimmed
+  isDimmed,
+  isTimeline = false
 }) {
   const { language, t } = useTranslation();
   const isTh = language === 'th';
@@ -184,14 +185,16 @@ export default function CourseCard({
             borderWidth: borderStyle.border.split(' ')[0],
             backgroundColor: catStyle.bgColor,
             boxShadow: borderStyle.boxShadow,
-            height: '82px', // STRICT UNIFORM HEIGHT
+            height: isTimeline ? '120px' : '82px',
+            minHeight: isTimeline ? '120px' : '82px',
+            width: isTimeline ? '200px' : '100%',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center',
+            justifyContent: 'space-between',
             overflow: 'hidden'
           }}
           bodyStyle={{ 
-            padding: '6px 10px', 
+            padding: isTimeline ? '8px 12px' : '6px 10px', 
             display: 'flex', 
             flexDirection: 'column', 
             justifyContent: 'space-between',
@@ -243,7 +246,7 @@ export default function CourseCard({
           </div>
 
           {/* Card Middle: Title */}
-          <div style={{ margin: '2px 0' }}>
+          <div style={{ margin: '2px 0', height: isTimeline ? '52px' : 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div 
               className="course-card-title-code"
               style={{ fontSize: '11px', fontWeight: 800, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
@@ -258,7 +261,18 @@ export default function CourseCard({
             ) : (
               <div 
                 className="course-card-title-text"
-                style={{ fontSize: '10px', fontWeight: 600, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
+                style={{ 
+                  fontSize: '10px', 
+                  fontWeight: 600, 
+                  color: '#475569', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis', 
+                  display: isTimeline ? '-webkit-box' : 'block',
+                  WebkitLineClamp: isTimeline ? 3 : undefined,
+                  WebkitBoxOrient: isTimeline ? 'vertical' : undefined,
+                  whiteSpace: isTimeline ? 'normal' : 'nowrap',
+                  lineHeight: '1.25'
+                }} 
                 title={displayTitle}
               >
                 {displayTitle}
