@@ -22,6 +22,8 @@ import {
 import { coursesData } from '../data/courses';
 import '@xyflow/react/dist/style.css';
 
+const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
 const { Title, Paragraph } = Typography;
 
 // Semesters list (8 columns)
@@ -316,6 +318,18 @@ export default function TracksTreeGrid({
   const isTh = language === 'th';
   const reactFlowRef = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
+
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handlePaneClick = useCallback(() => {
+    setHighlightedCourseCode(null);
+    setHoveredCourseCode(null);
+  }, [setHighlightedCourseCode, setHoveredCourseCode]);
 
   // Resize listener to center flowchart
   useEffect(() => {
@@ -615,8 +629,8 @@ export default function TracksTreeGrid({
               onSelectGeElective,
               selectedMajorElectives,
               onSelectMajorElective,
-              onHoverStart: setHoveredCourseCode,
-              onHoverEnd: () => setHoveredCourseCode(null),
+              onHoverStart: (code) => { if (!isTouchDevice) setHoveredCourseCode(code); },
+              onHoverEnd: () => { if (!isTouchDevice) setHoveredCourseCode(null); },
               highlightType,
               isDimmed
             },
@@ -770,9 +784,11 @@ export default function TracksTreeGrid({
             <Button size="small" icon={<ZoomOutOutlined />} onClick={handleZoomOut}>Zoom Out</Button>
             <Button size="small" icon={<FullscreenOutlined />} onClick={handleFitView}>Fit View</Button>
           </Space>
-          <div className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-            <BlockOutlined /> Miro-style Canvas Active
-          </div>
+          {windowWidth >= 640 && (
+            <div className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+              <BlockOutlined /> Miro-style Canvas Active
+            </div>
+          )}
         </div>
 
         {/* Dynamic Zoomable Pannable Viewport */}
@@ -780,7 +796,9 @@ export default function TracksTreeGrid({
           ref={reactFlowRef}
           style={{ 
             width: '100%', 
-            height: '620px', 
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            height: windowWidth < 640 ? '480px' : '620px', 
             position: 'relative', 
             border: '1px solid #e2e8f0', 
             borderRadius: '16px', 
@@ -793,6 +811,8 @@ export default function TracksTreeGrid({
             edges={edges}
             nodeTypes={nodeTypes}
             onInit={setReactFlowInstance}
+            onPaneClick={handlePaneClick}
+            onPaneTouchStart={handlePaneClick}
             fitView
             fitViewOptions={{ padding: 0.05 }}
             panOnScroll={false}

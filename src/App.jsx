@@ -418,7 +418,7 @@ export default function App() {
         },
       }}
     >
-      <Layout className="min-h-screen bg-slate-50">
+      <Layout className="min-h-screen bg-slate-50" style={{ overflowX: 'hidden' }}>
         {/* Banner Header */}
         <Header 
           style={{ 
@@ -593,7 +593,7 @@ export default function App() {
         </Drawer>
 
         {/* Content Body */}
-        <Content style={{ padding: windowWidth < 640 ? '12px 8px' : '32px 24px', width: '100%' }}>
+        <Content style={{ padding: windowWidth < 640 ? '12px 8px' : '32px 24px', width: '100%', overflowX: 'hidden' }}>
           <div className="max-w-7xl mx-auto space-y-8">
             
             {/* Credit Tracker Dashboard widget */}

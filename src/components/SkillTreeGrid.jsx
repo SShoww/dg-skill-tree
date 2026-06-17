@@ -6,6 +6,8 @@ import { useTranslation } from '../context/LanguageContext';
 
 const { Title, Paragraph } = Typography;
 
+const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
 export default function SkillTreeGrid({ 
   courses, 
   completedCourses, 
@@ -243,8 +245,17 @@ export default function SkillTreeGrid({
            `L ${x2} ${p4_y}`;
   };
 
+  const handleContainerClick = (e) => {
+    if (!e.target.closest('.course-card-wrapper') && 
+        !e.target.closest('.ant-tabs-nav') && 
+        !e.target.closest('button')) {
+      setHighlightedCourseCode(null);
+      setHoveredCourseCode(null);
+    }
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" onClick={handleContainerClick}>
       {/* Semester Grid Timeline */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -388,8 +399,8 @@ export default function SkillTreeGrid({
                               onSelectGeElective={onSelectGeElective}
                               selectedMajorElectives={selectedMajorElectives}
                               onSelectMajorElective={onSelectMajorElective}
-                              onHoverStart={setHoveredCourseCode}
-                              onHoverEnd={() => setHoveredCourseCode(null)}
+                              onHoverStart={(code) => { if (!isTouchDevice) setHoveredCourseCode(code); }}
+                              onHoverEnd={() => { if (!isTouchDevice) setHoveredCourseCode(null); }}
                               highlightType={highlightType}
                               isDimmed={isDimmed}
                             />
@@ -548,8 +559,8 @@ export default function SkillTreeGrid({
                                onSelectGeElective={onSelectGeElective}
                                selectedMajorElectives={selectedMajorElectives}
                                onSelectMajorElective={onSelectMajorElective}
-                               onHoverStart={setHoveredCourseCode}
-                               onHoverEnd={() => setHoveredCourseCode(null)}
+                               onHoverStart={(code) => { if (!isTouchDevice) setHoveredCourseCode(code); }}
+                               onHoverEnd={() => { if (!isTouchDevice) setHoveredCourseCode(null); }}
                                highlightType={highlightType}
                                isDimmed={isDimmed}
                             />
