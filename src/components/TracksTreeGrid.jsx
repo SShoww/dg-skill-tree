@@ -700,36 +700,44 @@ export default function TracksTreeGrid({
   ]);
 
   // 3. Generate Edges for React Flow
+  // We iterate over ALL courses so edges exist between nodes that are always rendered
+  // (nodes are never removed, only dimmed). An edge is hidden when either endpoint
+  // is not present in the filtered `courses` list (i.e., filtered out by category).
+  const filteredCodesSet = useMemo(() => new Set(courses.map(c => c.code)), [courses]);
+
   const edges = useMemo(() => {
     const list = [];
-    courses.forEach(course => {
+    allStudyPlanCourses.forEach(course => {
       if (!course.prereqs) return;
       course.prereqs.forEach(preCode => {
-        const hasPreNode = courses.some(c => c.code === preCode);
-        if (hasPreNode) {
-          let strokeColor = '#cbd5e1';
-          let strokeWidth = 2;
-          let animated = false;
-          let edgeOpacity = 1;
-          
+        // Only create the edge if the source node exists on the canvas at all
+        const hasPreNode = allStudyPlanCourses.some(c => c.code === preCode);
+        if (!hasPreNode) return;
+
+        // If either endpoint is filtered out by the category selector, hide the edge entirely
+        const sourceFiltered = !filteredCodesSet.has(preCode);
+        const targetFiltered = !filteredCodesSet.has(course.code);
+        const isHidden = sourceFiltered || targetFiltered;
+
+        let strokeColor = '#cbd5e1';
+        let strokeWidth = 2;
+        let animated = false;
+        let edgeOpacity = isHidden ? 0 : 1;
+
+        if (!isHidden) {
           if (activeFocusCode) {
-            // Check if both nodes are in the active focus chain
             const isSourceInChain = activeChain.includes(preCode);
             const isTargetInChain = activeChain.includes(course.code);
-            
+
             if (isSourceInChain && isTargetInChain) {
-              // It's part of the highlighted active path!
               strokeWidth = 3.5;
               animated = true;
-              // If target is in activeSuccessors or source is the active focus, it's green (unlocks)
-              // Otherwise it's red (prerequisites)
               if (activeSuccessors.includes(course.code) || preCode === activeFocusCode) {
                 strokeColor = '#10b981'; // Green for unlocked path
               } else {
                 strokeColor = '#ef4444'; // Red for prerequisite path
               }
             } else {
-              // Dim unrelated edges
               strokeColor = '#e2e8f0';
               strokeWidth = 1;
               edgeOpacity = 0.15;
@@ -746,33 +754,34 @@ export default function TracksTreeGrid({
               edgeOpacity = 0.15;
             }
           }
-          
-          list.push({
-            id: `e-${preCode}-${course.code}`,
-            source: preCode,
-            target: course.code,
-            type: 'smoothstep', // Orthogonal step line with rounded corners
-            sourceHandle: 'source-right',
-            targetHandle: 'target-left',
-            animated,
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              width: 14,
-              height: 14,
-              color: strokeColor
-            },
-            style: { 
-              stroke: strokeColor, 
-              strokeWidth,
-              opacity: edgeOpacity,
-              transition: 'stroke 0.2s, stroke-width 0.2s, opacity 0.2s'
-            }
-          });
         }
+
+        list.push({
+          id: `e-${preCode}-${course.code}`,
+          source: preCode,
+          target: course.code,
+          type: 'smoothstep',
+          sourceHandle: 'source-right',
+          targetHandle: 'target-left',
+          animated: isHidden ? false : animated,
+          markerEnd: isHidden ? undefined : {
+            type: MarkerType.ArrowClosed,
+            width: 14,
+            height: 14,
+            color: strokeColor
+          },
+          style: {
+            stroke: strokeColor,
+            strokeWidth: isHidden ? 0 : strokeWidth,
+            opacity: edgeOpacity,
+            pointerEvents: isHidden ? 'none' : 'auto',
+            transition: 'stroke 0.2s, stroke-width 0.2s, opacity 0.2s'
+          }
+        });
       });
     });
     return list;
-  }, [courses, activeFocusCode, activePredecessors, activeSuccessors, activeChain, careerFocus, careerRecommendedCodes]);
+  }, [allStudyPlanCourses, filteredCodesSet, activeFocusCode, activePredecessors, activeSuccessors, activeChain, careerFocus, careerRecommendedCodes]);
 
   // Viewport Zoom helper controls
   const handleZoomIn = () => reactFlowInstance && reactFlowInstance.zoomIn();
