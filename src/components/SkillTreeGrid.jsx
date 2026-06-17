@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import CourseCard from './CourseCard';
-import { Typography } from 'antd';
+import { Typography, Tabs } from 'antd';
 import { ScheduleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from '../context/LanguageContext';
 
@@ -104,9 +104,9 @@ export default function SkillTreeGrid({
   const activeFocusCode = hoveredCourseCode || highlightedCourseCode || selectedCourseCode;
   
   // Memoized chains of focus
-  const activePredecessors = activeFocusCode ? getPredecessors(activeFocusCode) : [];
-  const activeSuccessors = activeFocusCode ? getSuccessors(activeFocusCode) : [];
-  const activeChain = activeFocusCode ? [activeFocusCode, ...activePredecessors, ...activeSuccessors] : [];
+  const activePredecessors = useMemo(() => activeFocusCode ? getPredecessors(activeFocusCode) : [], [activeFocusCode, getPredecessors]);
+  const activeSuccessors = useMemo(() => activeFocusCode ? getSuccessors(activeFocusCode) : [], [activeFocusCode, getSuccessors]);
+  const activeChain = useMemo(() => activeFocusCode ? [activeFocusCode, ...activePredecessors, ...activeSuccessors] : [], [activeFocusCode, activePredecessors, activeSuccessors]);
 
   // Update lines positions for the SVG overlay
   const updateConnectionLines = useCallback(() => {
@@ -116,59 +116,43 @@ export default function SkillTreeGrid({
     }
 
     const svgRect = svgRef.current.getBoundingClientRect();
-    const currentCourse = courses.find(c => c.code === activeFocusCode);
-    if (!currentCourse) {
-      setConnections(prev => prev.length === 0 ? prev : []);
-      return;
-    }
-
     const newConnections = [];
 
-    // 1. Draw lines from direct prerequisites to active course (Red)
-    currentCourse.prereqs.forEach(preCode => {
-      const preEl = document.getElementById(`course-card-${preCode}`);
-      const selEl = document.getElementById(`course-card-${activeFocusCode}`);
-      
-      if (preEl && selEl) {
-        const preRect = preEl.getBoundingClientRect();
-        const selRect = selEl.getBoundingClientRect();
-        
-        const x1 = preRect.right - svgRect.left;
-        const y1 = preRect.top + preRect.height / 2 - svgRect.top;
-        const x2 = selRect.left - svgRect.left - 6; // Offset slightly for arrowhead
-        const y2 = selRect.top + selRect.height / 2 - svgRect.top;
-        
-        newConnections.push({
-          id: `line-sem-${preCode}-${activeFocusCode}`,
-          x1, y1, x2, y2,
-          type: 'prereq',
-          title: `Requires: ${preCode}`
-        });
-      }
-    });
+    // Loop through all courses in the active chain and connect them if they are prerequisites
+    courses.forEach(course => {
+      if (!activeChain.includes(course.code)) return;
 
-    // 2. Draw lines from active course to its direct successors (Green)
-    const postReqs = courses.filter(c => c.prereqs.includes(activeFocusCode));
-    postReqs.forEach(postCourse => {
-      const selEl = document.getElementById(`course-card-${activeFocusCode}`);
-      const postEl = document.getElementById(`course-card-${postCourse.code}`);
-      
-      if (selEl && postEl) {
-        const selRect = selEl.getBoundingClientRect();
-        const postRect = postEl.getBoundingClientRect();
+      course.prereqs.forEach(preCode => {
+        if (!activeChain.includes(preCode)) return;
+
+        const preEl = document.getElementById(`course-card-${preCode}`);
+        const selEl = document.getElementById(`course-card-${course.code}`);
         
-        const x1 = selRect.right - svgRect.left;
-        const y1 = selRect.top + selRect.height / 2 - svgRect.top;
-        const x2 = postRect.left - svgRect.left - 6; // Offset slightly for arrowhead
-        const y2 = postRect.top + postRect.height / 2 - svgRect.top;
-        
-        newConnections.push({
-          id: `line-sem-${activeFocusCode}-${postCourse.code}`,
-          x1, y1, x2, y2,
-          type: 'unlock',
-          title: `Unlocks: ${postCourse.dept_code}`
-        });
-      }
+        if (preEl && selEl) {
+          const preRect = preEl.getBoundingClientRect();
+          const selRect = selEl.getBoundingClientRect();
+          
+          const x1 = preRect.right - svgRect.left;
+          const y1 = preRect.top + preRect.height / 2 - svgRect.top;
+          const x2 = selRect.left - svgRect.left - 6; // Offset slightly for arrowhead
+          const y2 = selRect.top + selRect.height / 2 - svgRect.top;
+          
+          // Determine connection type:
+          // If the course is a successor of the active focus, or the prereq is the active focus itself, it's an unlock path (Green).
+          // Otherwise, it's part of the prerequisite ancestry path (Red).
+          let type = 'prereq';
+          if (activeSuccessors.includes(course.code) || preCode === activeFocusCode) {
+            type = 'unlock';
+          }
+
+          newConnections.push({
+            id: `line-sem-${preCode}-${course.code}`,
+            x1, y1, x2, y2,
+            type,
+            title: type === 'prereq' ? `Requires: ${preCode}` : `Unlocks: ${course.dept_code}`
+          });
+        }
+      });
     });
 
     // Prevent rendering loop by comparing content before setting state
@@ -186,7 +170,7 @@ export default function SkillTreeGrid({
       }
       return newConnections;
     });
-  }, [courses, activeFocusCode]);
+  }, [courses, activeFocusCode, activeChain, activeSuccessors]);
 
   useEffect(() => {
     const rId = requestAnimationFrame(() => {
@@ -222,12 +206,41 @@ export default function SkillTreeGrid({
   }, [updateConnectionLines, completedCourses, unlockedCourses, windowWidth, activeFocusCode]);
 
   const getCurvePath = (x1, y1, x2, y2) => {
-    const dx = Math.abs(x2 - x1);
-    const cx1 = x1 + dx * 0.45;
-    const cy1 = y1;
-    const cx2 = x2 - dx * 0.45;
-    const cy2 = y2;
-    return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
+    const R = 12; // border-radius size
+    const xMid = (x1 + x2) / 2;
+    
+    if (Math.abs(y1 - y2) < 2) {
+      return `M ${x1} ${y1} L ${x2} ${y2}`;
+    }
+    
+    const dirY = y2 > y1 ? 1 : -1;
+    const dirX = x2 > x1 ? 1 : -1;
+    
+    // Calculate dynamic radius to prevent overlaps if distance is too small
+    const r = Math.min(R, Math.abs(xMid - x1), Math.abs(y2 - y1) / 2);
+    
+    if (r <= 0) {
+      return `M ${x1} ${y1} L ${xMid} ${y1} L ${xMid} ${y2} L ${x2} ${y2}`;
+    }
+    
+    const p1_x = xMid - r * dirX;
+    const p1_y = y1;
+    
+    const p2_x = xMid;
+    const p2_y = y1 + r * dirY;
+    
+    const p3_x = xMid;
+    const p3_y = y2 - r * dirY;
+    
+    const p4_x = xMid + r * dirX;
+    const p4_y = y2;
+    
+    return `M ${x1} ${y1} ` +
+           `L ${p1_x} ${p1_y} ` +
+           `Q ${xMid} ${y1} ${p2_x} ${p2_y} ` +
+           `L ${p3_x} ${p3_y} ` +
+           `Q ${xMid} ${y2} ${p4_x} ${p4_y} ` +
+           `L ${x2} ${p4_y}`;
   };
 
   return (
@@ -256,166 +269,300 @@ export default function SkillTreeGrid({
           </div>
         </div>
 
-        {/* Horizontal scroll container */}
-        <div 
-          ref={containerRef}
-          className="relative overflow-x-auto pb-4 scroll-smooth"
-          style={{ WebkitOverflowScrolling: 'touch' }}
-        >
-          {/* SVG Overlay */}
-          <svg 
-            ref={svgRef}
-            className="absolute inset-0 pointer-events-none w-full h-full z-10"
-            style={{ minWidth: '1650px' }}
-          >
-            <defs>
-              <filter id="glow-red-s" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="3.5" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-              <filter id="glow-green-s" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="3.5" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-              
-              {/* Arrowhead Markers */}
-              <marker id="arrow-red-s" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
-                <path d="M0,0 L0,6 L6,3 Z" fill="#ef4444" />
-              </marker>
-              <marker id="arrow-green-s" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
-                <path d="M0,0 L0,6 L6,3 Z" fill="#10b981" />
-              </marker>
-            </defs>
-            
-            {connections.map(line => (
-              <path
-                key={line.id}
-                d={getCurvePath(line.x1, line.y1, line.x2, line.y2)}
-                fill="none"
-                stroke={line.type === 'prereq' ? '#ef4444' : '#10b981'}
-                strokeWidth={3.5}
-                filter={line.type === 'prereq' ? 'url(#glow-red-s)' : 'url(#glow-green-s)'}
-                markerEnd={line.type === 'prereq' ? 'url(#arrow-red-s)' : 'url(#arrow-green-s)'}
-                className="transition-all duration-300 stroke-dash"
-                title={line.title}
-              />
-            ))}
-          </svg>
-
-          {/* 8 Columns Grid */}
-          <div 
-            className="grid grid-cols-8 gap-5 relative z-20"
-            style={{ minWidth: '1650px' }}
-          >
-            {semesters.map((sem, idx) => {
+        {/* Responsive Semester View */}
+        {windowWidth < 768 ? (
+          <Tabs
+            defaultActiveKey="0"
+            type="card"
+            centered
+            className="mobile-semester-tabs"
+            items={semesters.map((sem, idx) => {
               const semCourses = studyPlanCourses.filter(
                 c => c.year === sem.year && c.semester === sem.semester
               );
 
-              return (
-                <div key={idx} className="space-y-4">
-                  {/* Semester Header */}
-                  <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3 text-center shadow-[0_2px_4px_rgba(0,0,0,0.01)] select-none">
-                    <span className="font-extrabold text-[10px] text-slate-400 block uppercase tracking-wider">
-                      {t('year')} {sem.year}
+              // Check if this semester has any active/prereq/unlock courses
+              const hasActive = semCourses.some(c => c.code === activeFocusCode);
+              const hasPrereq = semCourses.some(c => activePredecessors.includes(c.code));
+              const hasUnlock = semCourses.some(c => activeSuccessors.includes(c.code));
+
+              // Tab header label with indicators
+              const tabLabel = (
+                <span className="flex items-center gap-1 text-[11px] font-extrabold select-none">
+                  {sem.label.replace('Sem ', 'S').replace('เทอม ', 'ท')}
+                  {activeFocusCode && (
+                    <span className="flex gap-0.5">
+                      {hasActive && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" title="Active Focus" />}
+                      {hasPrereq && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" title="Prerequisite" />}
+                      {hasUnlock && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Unlock" />}
                     </span>
-                    <span className="font-black text-sm text-slate-700">
-                      {t('semester')} {sem.semester}
-                    </span>
-                  </div>
+                  )}
+                </span>
+              );
 
-                  {/* Course Cards List */}
-                  <div className="semester-col-scrollable space-y-3 pr-1">
-                    {semCourses.map(course => {
-                      const isCompleted = completedCourses.includes(course.code);
-                      const isUnlocked = unlockedCourses.includes(course.code);
-                      const isSelected = selectedCourseCode === course.code;
-                      const isCareerRecommended = careerRecommendedCodes.includes(course.code);
-                      const { missing = [], isOr = false } = getMissingPrereqs ? getMissingPrereqs(course.code) : {};
+              return {
+                label: tabLabel,
+                key: String(idx),
+                children: (
+                  <div className="space-y-4 pt-2">
+                    {/* Header in pane */}
+                    <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3 text-center select-none">
+                      <span className="font-extrabold text-[10px] text-slate-400 block uppercase tracking-wider">
+                        {t('year')} {sem.year}
+                      </span>
+                      <span className="font-black text-sm text-slate-700">
+                        {t('semester')} {sem.semester}
+                      </span>
+                    </div>
 
-                      // Check if this is a Major Elective slot and if it's assigned
-                      const isMajorElectiveSlot = course.category === 'Major_Elective' && course.code.startsWith('MJ-EL-');
-                      const assignedCourseCode = isMajorElectiveSlot ? selectedMajorElectives[course.code] : null;
+                    {/* Course Cards List */}
+                    <div className="space-y-3 w-full">
+                      {semCourses.map(course => {
+                        const isCompleted = completedCourses.includes(course.code);
+                        const isUnlocked = unlockedCourses.includes(course.code);
+                        const isSelected = selectedCourseCode === course.code;
+                        const isCareerRecommended = careerRecommendedCodes.includes(course.code);
+                        const { missing = [], isOr = false } = getMissingPrereqs ? getMissingPrereqs(course.code) : {};
 
-                      // Determine path highlighting state
-                      let highlightType = null;
-                      if (isSelected) {
-                        highlightType = 'selected';
-                      } else if (activeFocusCode === course.code) {
-                        highlightType = 'selected';
-                      } else if (activePredecessors.includes(course.code)) {
-                        highlightType = 'prereq';
-                      } else if (activeSuccessors.includes(course.code)) {
-                        highlightType = 'unlock';
-                      }
+                        const isMajorElectiveSlot = course.category === 'Major_Elective' && course.code.startsWith('MJ-EL-');
+                        const assignedCourseCode = isMajorElectiveSlot ? selectedMajorElectives[course.code] : null;
 
-                      // Determine if card should dim
-                      let isDimmed = false;
-                      if (activeFocusCode) {
-                        isDimmed = !activeChain.includes(course.code);
-                      } else if (careerFocus) {
-                        isDimmed = !isCareerRecommended;
-                      }
+                        let highlightType = null;
+                        if (isSelected) {
+                          highlightType = 'selected';
+                        } else if (activeFocusCode === course.code) {
+                          highlightType = 'selected';
+                        } else if (activePredecessors.includes(course.code)) {
+                          highlightType = 'prereq';
+                        } else if (activeSuccessors.includes(course.code)) {
+                          highlightType = 'unlock';
+                        }
 
-                      if (isMajorElectiveSlot && !assignedCourseCode) {
-                        // Render interactive dashed slot card
+                        let isDimmed = false;
+                        if (activeFocusCode) {
+                          isDimmed = !activeChain.includes(course.code);
+                        } else if (careerFocus) {
+                          isDimmed = !isCareerRecommended;
+                        }
+
+                        if (isMajorElectiveSlot && !assignedCourseCode) {
+                          return (
+                            <div 
+                              key={course.code} 
+                              onClick={() => onAddMajorElectiveSlotClick && onAddMajorElectiveSlotClick(course.code)}
+                              className="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer transition-all duration-200"
+                              style={{ height: '82px', userSelect: 'none' }}
+                            >
+                              <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <PlusOutlined style={{ fontSize: '11px' }} /> {isTh ? 'วิชาเอกเลือก' : 'Major Elective'}
+                              </span>
+                              <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                {isTh ? 'คลิกเพื่อเลือกวิชา' : 'Click to Add Slot'}
+                              </span>
+                            </div>
+                          );
+                        }
+
                         return (
-                          <div 
-                            key={course.code} 
-                            id={`course-card-${course.code}`}
-                            onClick={() => onAddMajorElectiveSlotClick && onAddMajorElectiveSlotClick(course.code)}
-                            className="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer transition-all duration-200"
-                            style={{ height: '82px', userSelect: 'none' }}
-                          >
-                            <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <PlusOutlined style={{ fontSize: '11px' }} /> {isTh ? 'วิชาเอกเลือก' : 'Major Elective'}
-                            </span>
-                            <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                              {isTh ? 'คลิกเพื่อเลือกวิชา' : 'Click to Add Slot'}
-                            </span>
+                          <div key={course.code}>
+                            <CourseCard
+                              course={course}
+                              isCompleted={isCompleted}
+                              isUnlocked={isUnlocked}
+                              isSelected={isSelected}
+                              isCareerRecommended={isCareerRecommended}
+                              hasActiveCareerFocus={!!careerFocus}
+                              missingPrereqs={missing}
+                              isOrPrereq={isOr}
+                              onClick={() => {
+                                if (highlightedCourseCode === course.code) {
+                                  setHighlightedCourseCode(null);
+                                } else {
+                                  setHighlightedCourseCode(course.code);
+                                }
+                              }}
+                              onDoubleClick={() => onSelectCourse(course.code)}
+                              onOpenDetails={() => onSelectCourse(course.code)}
+                              onToggleComplete={onToggleComplete}
+                              selectedGeElectives={selectedGeElectives}
+                              onSelectGeElective={onSelectGeElective}
+                              selectedMajorElectives={selectedMajorElectives}
+                              onSelectMajorElective={onSelectMajorElective}
+                              onHoverStart={setHoveredCourseCode}
+                              onHoverEnd={() => setHoveredCourseCode(null)}
+                              highlightType={highlightType}
+                              isDimmed={isDimmed}
+                            />
                           </div>
                         );
-                      }
-
-                      return (
-                        <div key={course.code} id={`course-card-${course.code}`}>
-                          <CourseCard
-                            course={course}
-                            isCompleted={isCompleted}
-                            isUnlocked={isUnlocked}
-                            isSelected={isSelected}
-                            isCareerRecommended={isCareerRecommended}
-                            hasActiveCareerFocus={!!careerFocus}
-                            missingPrereqs={missing}
-                            isOrPrereq={isOr}
-                             onClick={() => {
-                               if (highlightedCourseCode === course.code) {
-                                 setHighlightedCourseCode(null);
-                               } else {
-                                 setHighlightedCourseCode(course.code);
-                               }
-                             }}
-                             onDoubleClick={() => onSelectCourse(course.code)}
-                             onOpenDetails={() => onSelectCourse(course.code)}
-                             onToggleComplete={onToggleComplete}
-                             selectedGeElectives={selectedGeElectives}
-                             onSelectGeElective={onSelectGeElective}
-                             selectedMajorElectives={selectedMajorElectives}
-                             onSelectMajorElective={onSelectMajorElective}
-                             onHoverStart={setHoveredCourseCode}
-                             onHoverEnd={() => setHoveredCourseCode(null)}
-                             highlightType={highlightType}
-                             isDimmed={isDimmed}
-                          />
-                        </div>
-                      );
-                    })}
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
+                )
+              };
             })}
+          />
+        ) : (
+          <div 
+            ref={containerRef}
+            className="relative overflow-x-auto pb-4 scroll-smooth"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            {/* SVG Overlay */}
+            <svg 
+              ref={svgRef}
+              className="absolute inset-0 pointer-events-none w-full h-full z-10"
+              style={{ minWidth: '1650px' }}
+            >
+              <defs>
+                <filter id="glow-red-s" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3.5" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+                <filter id="glow-green-s" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3.5" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+                
+                {/* Arrowhead Markers */}
+                <marker id="arrow-red-s" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L6,3 Z" fill="#ef4444" />
+                </marker>
+                <marker id="arrow-green-s" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L6,3 Z" fill="#10b981" />
+                </marker>
+              </defs>
+              
+              {connections.map(line => (
+                <path
+                  key={line.id}
+                  d={getCurvePath(line.x1, line.y1, line.x2, line.y2)}
+                  fill="none"
+                  stroke={line.type === 'prereq' ? '#ef4444' : '#10b981'}
+                  strokeWidth={3.5}
+                  filter={line.type === 'prereq' ? 'url(#glow-red-s)' : 'url(#glow-green-s)'}
+                  markerEnd={line.type === 'prereq' ? 'url(#arrow-red-s)' : 'url(#arrow-green-s)'}
+                  className="transition-all duration-300 stroke-dash"
+                  title={line.title}
+                />
+              ))}
+            </svg>
+
+            {/* 8 Columns Grid */}
+            <div 
+              className="grid grid-cols-8 gap-5 relative z-20"
+              style={{ minWidth: '1650px' }}
+            >
+              {semesters.map((sem, idx) => {
+                const semCourses = studyPlanCourses.filter(
+                  c => c.year === sem.year && c.semester === sem.semester
+                );
+
+                return (
+                  <div key={idx} className="space-y-4">
+                    {/* Semester Header */}
+                    <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3 text-center shadow-[0_2px_4px_rgba(0,0,0,0.01)] select-none">
+                      <span className="font-extrabold text-[10px] text-slate-400 block uppercase tracking-wider">
+                        {t('year')} {sem.year}
+                      </span>
+                      <span className="font-black text-sm text-slate-700">
+                        {t('semester')} {sem.semester}
+                      </span>
+                    </div>
+
+                    {/* Course Cards List */}
+                    <div className="semester-col-scrollable space-y-3 pr-1">
+                      {semCourses.map(course => {
+                        const isCompleted = completedCourses.includes(course.code);
+                        const isUnlocked = unlockedCourses.includes(course.code);
+                        const isSelected = selectedCourseCode === course.code;
+                        const isCareerRecommended = careerRecommendedCodes.includes(course.code);
+                        const { missing = [], isOr = false } = getMissingPrereqs ? getMissingPrereqs(course.code) : {};
+
+                        // Check if this is a Major Elective slot and if it's assigned
+                        const isMajorElectiveSlot = course.category === 'Major_Elective' && course.code.startsWith('MJ-EL-');
+                        const assignedCourseCode = isMajorElectiveSlot ? selectedMajorElectives[course.code] : null;
+
+                        // Determine path highlighting state
+                        let highlightType = null;
+                        if (isSelected) {
+                          highlightType = 'selected';
+                        } else if (activeFocusCode === course.code) {
+                          highlightType = 'selected';
+                        } else if (activePredecessors.includes(course.code)) {
+                          highlightType = 'prereq';
+                        } else if (activeSuccessors.includes(course.code)) {
+                          highlightType = 'unlock';
+                        }
+
+                        // Determine if card should dim
+                        let isDimmed = false;
+                        if (activeFocusCode) {
+                          isDimmed = !activeChain.includes(course.code);
+                        } else if (careerFocus) {
+                          isDimmed = !isCareerRecommended;
+                        }
+
+                        if (isMajorElectiveSlot && !assignedCourseCode) {
+                          // Render interactive dashed slot card
+                          return (
+                            <div 
+                              key={course.code} 
+                              id={`course-card-${course.code}`}
+                              onClick={() => onAddMajorElectiveSlotClick && onAddMajorElectiveSlotClick(course.code)}
+                              className="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer transition-all duration-200"
+                              style={{ height: '82px', userSelect: 'none' }}
+                            >
+                              <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <PlusOutlined style={{ fontSize: '11px' }} /> {isTh ? 'วิชาเอกเลือก' : 'Major Elective'}
+                              </span>
+                              <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                {isTh ? 'คลิกเพื่อเลือกวิชา' : 'Click to Add Slot'}
+                              </span>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div key={course.code} id={`course-card-${course.code}`}>
+                            <CourseCard
+                              course={course}
+                              isCompleted={isCompleted}
+                              isUnlocked={isUnlocked}
+                              isSelected={isSelected}
+                              isCareerRecommended={isCareerRecommended}
+                              hasActiveCareerFocus={!!careerFocus}
+                              missingPrereqs={missing}
+                              isOrPrereq={isOr}
+                               onClick={() => {
+                                 if (highlightedCourseCode === course.code) {
+                                   setHighlightedCourseCode(null);
+                                 } else {
+                                   setHighlightedCourseCode(course.code);
+                                 }
+                               }}
+                               onDoubleClick={() => onSelectCourse(course.code)}
+                               onOpenDetails={() => onSelectCourse(course.code)}
+                               onToggleComplete={onToggleComplete}
+                               selectedGeElectives={selectedGeElectives}
+                               onSelectGeElective={onSelectGeElective}
+                               selectedMajorElectives={selectedMajorElectives}
+                               onSelectMajorElective={onSelectMajorElective}
+                               onHoverStart={setHoveredCourseCode}
+                               onHoverEnd={() => setHoveredCourseCode(null)}
+                               highlightType={highlightType}
+                               isDimmed={isDimmed}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

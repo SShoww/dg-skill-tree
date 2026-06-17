@@ -100,7 +100,7 @@ export default function CourseCard({
   const borderStyle = getBorderStyles();
 
   // Dimming factor when other items are active
-  const opacityClass = isDimmed ? 'opacity-20 grayscale-[30%] blur-[0.3px]' : 'opacity-100';
+  const opacityClass = isDimmed ? 'opacity-15 grayscale-[30%] blur-[0.3px]' : 'opacity-100';
 
   const handleCheckboxChange = (e) => {
     e.stopPropagation();

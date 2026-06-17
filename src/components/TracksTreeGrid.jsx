@@ -463,7 +463,13 @@ export default function TracksTreeGrid({
         columnWidth: ColumnWidth
       },
       position: { x: X_start_offset, y: trackLayout.trackY[tIdx] },
-      style: { width: 8 * ColumnWidth, height: trackLayout.trackHeights[tIdx], zIndex: -1 },
+      style: { 
+        width: 8 * ColumnWidth, 
+        height: trackLayout.trackHeights[tIdx], 
+        zIndex: -1,
+        opacity: activeFocusCode ? 0.15 : 1,
+        transition: 'opacity 0.25s'
+      },
       draggable: false,
       selectable: false,
       deletable: false
@@ -482,7 +488,12 @@ export default function TracksTreeGrid({
         x: 20, 
         y: trackLayout.trackY[tIdx] + (trackLayout.trackHeights[tIdx] - 44) / 2
       },
-      style: { width: 200, zIndex: 10 },
+      style: { 
+        width: 200, 
+        zIndex: 10,
+        opacity: activeFocusCode ? 0.15 : 1,
+        transition: 'opacity 0.25s'
+      },
       draggable: false,
       selectable: false,
       deletable: false
@@ -499,7 +510,12 @@ export default function TracksTreeGrid({
         x: X_start_offset + sIdx * ColumnWidth + 10,
         y: 20
       },
-      style: { width: ColumnWidth - 20, zIndex: 10 },
+      style: { 
+        width: ColumnWidth - 20, 
+        zIndex: 10,
+        opacity: activeFocusCode ? 0.15 : 1,
+        transition: 'opacity 0.25s'
+      },
       draggable: false,
       selectable: false,
       deletable: false
@@ -653,22 +669,29 @@ export default function TracksTreeGrid({
           let strokeColor = '#cbd5e1';
           let strokeWidth = 2;
           let animated = false;
-          
-          const isTargetHovered = activeFocusCode === course.code;
-          const isSourceHovered = activeFocusCode === preCode;
+          let edgeOpacity = 1;
           
           if (activeFocusCode) {
-            if (isTargetHovered && activePredecessors.includes(preCode)) {
-              strokeColor = '#ef4444'; // Red for prerequisite path
-              strokeWidth = 3;
+            // Check if both nodes are in the active focus chain
+            const isSourceInChain = activeChain.includes(preCode);
+            const isTargetInChain = activeChain.includes(course.code);
+            
+            if (isSourceInChain && isTargetInChain) {
+              // It's part of the highlighted active path!
+              strokeWidth = 3.5;
               animated = true;
-            } else if (isSourceHovered && activeSuccessors.includes(course.code)) {
-              strokeColor = '#10b981'; // Green for unlocked path
-              strokeWidth = 3;
-              animated = true;
+              // If target is in activeSuccessors or source is the active focus, it's green (unlocks)
+              // Otherwise it's red (prerequisites)
+              if (activeSuccessors.includes(course.code) || preCode === activeFocusCode) {
+                strokeColor = '#10b981'; // Green for unlocked path
+              } else {
+                strokeColor = '#ef4444'; // Red for prerequisite path
+              }
             } else {
-              strokeColor = '#f1f5f9';
+              // Dim unrelated edges
+              strokeColor = '#e2e8f0';
               strokeWidth = 1;
+              edgeOpacity = 0.15;
             }
           } else if (careerFocus) {
             const isSourceRec = careerRecommendedCodes.includes(preCode);
@@ -677,8 +700,9 @@ export default function TracksTreeGrid({
               strokeColor = '#f59e0b';
               strokeWidth = 2.5;
             } else {
-              strokeColor = '#f1f5f9';
+              strokeColor = '#e2e8f0';
               strokeWidth = 1;
+              edgeOpacity = 0.15;
             }
           }
           
@@ -686,6 +710,7 @@ export default function TracksTreeGrid({
             id: `e-${preCode}-${course.code}`,
             source: preCode,
             target: course.code,
+            type: 'smoothstep', // Orthogonal step line with rounded corners
             sourceHandle: 'source-right',
             targetHandle: 'target-left',
             animated,
@@ -698,14 +723,15 @@ export default function TracksTreeGrid({
             style: { 
               stroke: strokeColor, 
               strokeWidth,
-              transition: 'stroke 0.2s, stroke-width 0.2s'
+              opacity: edgeOpacity,
+              transition: 'stroke 0.2s, stroke-width 0.2s, opacity 0.2s'
             }
           });
         }
       });
     });
     return list;
-  }, [allStudyPlanCourses, activeFocusCode, activePredecessors, activeSuccessors, careerFocus, careerRecommendedCodes]);
+  }, [allStudyPlanCourses, activeFocusCode, activePredecessors, activeSuccessors, activeChain, careerFocus, careerRecommendedCodes]);
 
   // Viewport Zoom helper controls
   const handleZoomIn = () => reactFlowInstance && reactFlowInstance.zoomIn();

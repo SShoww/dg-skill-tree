@@ -36,6 +36,13 @@ export default function App() {
   const { language, setLanguage, t } = useTranslation();
   const isTh = language === 'th';
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // State: Mobile menu drawer open
   const [menuDrawerOpen, setMenuDrawerOpen] = useState(false);
 
@@ -427,15 +434,22 @@ export default function App() {
           className="px-4 py-3 sm:px-6"
         >
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ backgroundColor: '#4f46e5', padding: '10px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <RocketOutlined style={{ color: '#ffffff', fontSize: '22px' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: windowWidth < 640 ? '8px' : '12px' }}>
+              <div style={{ 
+                backgroundColor: '#4f46e5', 
+                padding: windowWidth < 640 ? '6px' : '10px', 
+                borderRadius: '10px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center' 
+              }}>
+                <RocketOutlined style={{ color: '#ffffff', fontSize: windowWidth < 640 ? '16px' : '22px' }} />
               </div>
               <div>
-                <Title level={4} style={{ margin: 0, fontWeight: 900, color: '#1e293b' }} className="text-sm sm:text-base md:text-lg">
+                <Title level={4} style={{ margin: 0, fontWeight: 900, color: '#1e293b', fontSize: windowWidth < 640 ? '14px' : undefined }} className="text-sm sm:text-base md:text-lg">
                   {t('app_title')}
                 </Title>
-                <Text style={{ fontSize: '10px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                <Text style={{ fontSize: '10px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px', display: windowWidth < 640 ? 'none' : 'block' }}>
                   {t('app_subtitle')}
                 </Text>
               </div>
@@ -579,7 +593,7 @@ export default function App() {
         </Drawer>
 
         {/* Content Body */}
-        <Content style={{ padding: '32px 24px', width: '100%' }}>
+        <Content style={{ padding: windowWidth < 640 ? '12px 8px' : '32px 24px', width: '100%' }}>
           <div className="max-w-7xl mx-auto space-y-8">
             
             {/* Credit Tracker Dashboard widget */}
@@ -797,26 +811,34 @@ export default function App() {
                 allowClear
               />
 
-              <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto scrollbar-none pb-1 md:pb-0">
-                <span style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }} className="flex items-center gap-1 shrink-0">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto overflow-hidden">
+                <span style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }} className="flex items-center gap-1 shrink-0 select-none">
                   <FilterOutlined /> {t('filter_category')}
                 </span>
-                <div className="overflow-x-auto scrollbar-none">
-                  <Radio.Group 
-                    value={categoryFilter} 
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                    optionType="button"
-                    buttonStyle="solid"
-                    size="small"
-                    className="flex flex-nowrap"
-                  >
-                    <Radio.Button value="All" className="shrink-0">{t('cat_all')}</Radio.Button>
-                    <Radio.Button value="GE" className="shrink-0">{t('cat_ge')}</Radio.Button>
-                    <Radio.Button value="Core" className="shrink-0">{t('cat_core')}</Radio.Button>
-                    <Radio.Button value="Major_Required" className="shrink-0">{t('cat_major_req')}</Radio.Button>
-                    <Radio.Button value="Major_Elective" className="shrink-0">{t('cat_major_elec')}</Radio.Button>
-                    <Radio.Button value="Free_Elective" className="shrink-0">{t('cat_free_elec')}</Radio.Button>
-                  </Radio.Group>
+                <div className="w-full overflow-x-auto scrollbar-none flex gap-2 py-1 px-1 -mx-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  {[
+                    { value: 'All', label: t('cat_all') },
+                    { value: 'GE', label: t('cat_ge') },
+                    { value: 'Core', label: t('cat_core') },
+                    { value: 'Major_Required', label: t('cat_major_req') },
+                    { value: 'Major_Elective', label: t('cat_major_elec') },
+                    { value: 'Free_Elective', label: t('cat_free_elec') }
+                  ].map(cat => {
+                    const isSelected = categoryFilter === cat.value;
+                    return (
+                      <button
+                        key={cat.value}
+                        onClick={() => setCategoryFilter(cat.value)}
+                        className={`px-3.5 py-1.5 text-xs font-bold rounded-full border transition-all duration-200 cursor-pointer shrink-0 select-none ${
+                          isSelected 
+                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-100' 
+                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -1082,17 +1104,33 @@ export default function App() {
         
         </Drawer>
 
-        {/* Floating Action Button (FAB) */}
-        <FloatButton
+        {/* Floating Action Button Group (FAB) */}
+        <FloatButton.Group
+          trigger="click"
           type="primary"
-          icon={<BookOutlined />}
-          tooltip={<div>{t('fab_tooltip')}</div>}
-          onClick={() => {
-            setActiveSlotTarget(null);
-            setDrawerOpen(true);
-          }}
-          style={{ right: 24, bottom: 24, width: 48, height: 48 }}
-        />
+          icon={<MenuOutlined />}
+          style={{ right: 24, bottom: 24 }}
+        >
+          <FloatButton
+            icon={<BookOutlined />}
+            tooltip={<div>{t('btn_browse_electives')}</div>}
+            onClick={() => {
+              setActiveSlotTarget(null);
+              setDrawerOpen(true);
+            }}
+          />
+          <FloatButton
+            icon={<UndoOutlined />}
+            tooltip={<div>{t('btn_reset_planner')}</div>}
+            onClick={handleReset}
+            danger
+          />
+          <FloatButton
+            icon={<span style={{ fontWeight: 900, fontSize: '10px' }}>{language === 'th' ? 'EN' : 'TH'}</span>}
+            tooltip={<div>{language === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย'}</div>}
+            onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
+          />
+        </FloatButton.Group>
       </Layout>
     </ConfigProvider>
   );
