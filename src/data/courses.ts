@@ -334,9 +334,11 @@ export const coursesData: Course[] = [
     "year": 1,
     "semester": 2,
     "track": "Core",
-    "prereqs": [],
-    "prereq_text_th": "",
-    "prereq_text_en": "None"
+    "prereqs": [
+      "958111"
+    ],
+    "prereq_text_th": "ศท.ดก.111 (958111)",
+    "prereq_text_en": "DG 111 (958111)"
   },
   {
     "code": "958113",
