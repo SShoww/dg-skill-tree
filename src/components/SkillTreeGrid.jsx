@@ -3,6 +3,7 @@ import CourseCard from './CourseCard';
 import { Typography, Tabs } from 'antd';
 import { ScheduleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from '../context/LanguageContext';
+import { coursesData } from '../data/courses';
 
 const { Title, Paragraph } = Typography;
 
@@ -139,21 +140,33 @@ export default function SkillTreeGrid({
           const x2 = selRect.left - svgRect.left - 10; // Offset slightly for arrowhead
           const y2 = selRect.top + selRect.height / 2 - svgRect.top;
           
-          const isSameLevel = Math.abs(y2 - y1) < 10;
+          // Retrieve static course objects from coursesData
+          const preCourseObj = coursesData.find(c => c.code === preCode);
+          const targetCourseObj = coursesData.find(c => c.code === course.code);
+          
+          let isSameSemanticRow = false;
+          let isAdjacentColumn = false;
+          
+          if (preCourseObj && targetCourseObj && 
+              preCourseObj.year !== null && preCourseObj.semester !== null &&
+              targetCourseObj.year !== null && targetCourseObj.semester !== null) {
+              
+            const preColIdx = (preCourseObj.year - 1) * 2 + (preCourseObj.semester - 1);
+            const targetColIdx = (targetCourseObj.year - 1) * 2 + (targetCourseObj.semester - 1);
+            isAdjacentColumn = targetColIdx === preColIdx + 1;
+            
+            // Find row index in their respective semesters
+            const preSemCourses = coursesData.filter(c => c.year === preCourseObj.year && c.semester === preCourseObj.semester);
+            const targetSemCourses = coursesData.filter(c => c.year === targetCourseObj.year && c.semester === targetCourseObj.semester);
+            
+            const preRowIdx = preSemCourses.findIndex(c => c.code === preCode);
+            const targetRowIdx = targetSemCourses.findIndex(c => c.code === course.code);
+            
+            isSameSemanticRow = preRowIdx === targetRowIdx && preRowIdx !== -1;
+          }
 
-          // Check if immediately adjacent semester columns
-          const preCourseObj = courses.find(c => c.code === preCode);
-          const targetCourseObj = course;
-          
-          const preColIdx = preCourseObj && preCourseObj.year !== null && preCourseObj.semester !== null
-            ? (preCourseObj.year - 1) * 2 + (preCourseObj.semester - 1)
-            : -999;
-          const targetColIdx = targetCourseObj && targetCourseObj.year !== null && targetCourseObj.semester !== null
-            ? (targetCourseObj.year - 1) * 2 + (targetCourseObj.semester - 1)
-            : -999;
-          
-          const isAdjacentColumn = targetColIdx === preColIdx + 1;
-          const isAdjacentSameRow = isSameLevel && isAdjacentColumn;
+          const isSameLevel = isSameSemanticRow || (Math.abs(y2 - y1) < 15);
+          const isAdjacentSameRow = isAdjacentColumn && (isSameSemanticRow || Math.abs(y2 - y1) < 20);
 
           // Determine connection type:
           // If the course is a successor of the active focus, or the prereq is the active focus itself, it's an unlock path (Green).
@@ -509,7 +522,7 @@ export default function SkillTreeGrid({
                     fill="none"
                     stroke={line.type === 'prereq' ? '#ef4444' : '#10b981'}
                     strokeWidth={line.isAdjacentSameRow ? 2 : 3.5}
-                    filter={line.type === 'prereq' ? 'url(#glow-red-s)' : 'url(#glow-green-s)'}
+                    filter={line.isAdjacentSameRow ? undefined : (line.type === 'prereq' ? 'url(#glow-red-s)' : 'url(#glow-green-s)')}
                     markerEnd={line.type === 'prereq' ? 'url(#arrow-red-s)' : 'url(#arrow-green-s)'}
                     className="transition-all duration-300 stroke-dash"
                     style={line.isSameLevel ? { strokeDasharray: '6, 4' } : undefined}
