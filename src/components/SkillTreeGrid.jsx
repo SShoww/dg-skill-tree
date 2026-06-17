@@ -210,7 +210,7 @@ export default function SkillTreeGrid({
   const getCurvePath = (x1, y1, x2, y2) => {
     const actualDx = x2 - x1;
     const direction = actualDx >= 0 ? 1 : -1;
-    const controlDx = Math.max(Math.abs(actualDx), 100) * direction;
+    const controlDx = Math.max(Math.abs(actualDx), 120) * direction;
     const cx1 = x1 + controlDx * 0.45;
     const cy1 = y1;
     const cx2 = x2 - controlDx * 0.45;
