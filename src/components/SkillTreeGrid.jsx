@@ -141,6 +141,20 @@ export default function SkillTreeGrid({
           
           const isSameLevel = Math.abs(y2 - y1) < 10;
 
+          // Check if immediately adjacent semester columns
+          const preCourseObj = courses.find(c => c.code === preCode);
+          const targetCourseObj = course;
+          
+          const preColIdx = preCourseObj && preCourseObj.year !== null && preCourseObj.semester !== null
+            ? (preCourseObj.year - 1) * 2 + (preCourseObj.semester - 1)
+            : -999;
+          const targetColIdx = targetCourseObj && targetCourseObj.year !== null && targetCourseObj.semester !== null
+            ? (targetCourseObj.year - 1) * 2 + (targetCourseObj.semester - 1)
+            : -999;
+          
+          const isAdjacentColumn = targetColIdx === preColIdx + 1;
+          const isAdjacentSameRow = isSameLevel && isAdjacentColumn;
+
           // Determine connection type:
           // If the course is a successor of the active focus, or the prereq is the active focus itself, it's an unlock path (Green).
           // Otherwise, it's part of the prerequisite ancestry path (Red).
@@ -154,6 +168,7 @@ export default function SkillTreeGrid({
             x1, y1, x2, y2,
             type,
             isSameLevel,
+            isAdjacentSameRow,
             title: type === 'prereq' ? `Requires: ${preCode}` : `Unlocks: ${course.dept_code}`
           });
         }
@@ -169,7 +184,8 @@ export default function SkillTreeGrid({
             conn.x2 === newConnections[i].x2 && 
             conn.y2 === newConnections[i].y2 &&
             conn.type === newConnections[i].type &&
-            conn.isSameLevel === newConnections[i].isSameLevel
+            conn.isSameLevel === newConnections[i].isSameLevel &&
+            conn.isAdjacentSameRow === newConnections[i].isAdjacentSameRow
           )
       ) {
         return prev;
@@ -211,7 +227,11 @@ export default function SkillTreeGrid({
     };
   }, [updateConnectionLines, completedCourses, unlockedCourses, windowWidth, activeFocusCode]);
 
-  const getCurvePath = (x1, y1, x2, y2) => {
+  const getCurvePath = (x1, y1, x2, y2, isAdjacentSameRow = false) => {
+    if (isAdjacentSameRow) {
+      return `M ${x1} ${y1} L ${x2} ${y2}`;
+    }
+
     const xMid = (x1 + x2) / 2;
     const dy = y2 - y1;
     
@@ -485,10 +505,10 @@ export default function SkillTreeGrid({
                 {connections.map(line => (
                   <path
                     key={line.id}
-                    d={getCurvePath(line.x1, line.y1, line.x2, line.y2)}
+                    d={getCurvePath(line.x1, line.y1, line.x2, line.y2, line.isAdjacentSameRow)}
                     fill="none"
                     stroke={line.type === 'prereq' ? '#ef4444' : '#10b981'}
-                    strokeWidth={3.5}
+                    strokeWidth={line.isAdjacentSameRow ? 2 : 3.5}
                     filter={line.type === 'prereq' ? 'url(#glow-red-s)' : 'url(#glow-green-s)'}
                     markerEnd={line.type === 'prereq' ? 'url(#arrow-red-s)' : 'url(#arrow-green-s)'}
                     className="transition-all duration-300 stroke-dash"
