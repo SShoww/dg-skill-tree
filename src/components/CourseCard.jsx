@@ -165,7 +165,7 @@ export default function CourseCard({
         onDoubleClick={onDoubleClick}
         onMouseEnter={() => onHoverStart && onHoverStart(course.code)}
         onMouseLeave={() => onHoverEnd && onHoverEnd()}
-        className={`course-card-wrapper transition-all duration-200 cursor-pointer ${opacityClass}`}
+        className={`course-card course-card-wrapper transition-all duration-200 cursor-pointer ${opacityClass}`}
         style={{
           transform: borderStyle.scale,
           transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',

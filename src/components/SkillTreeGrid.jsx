@@ -481,7 +481,7 @@ export default function SkillTreeGrid({
                 );
 
                 return (
-                  <div key={idx} className="space-y-4">
+                  <div key={idx} className="space-y-4 semester-column-container">
                     {/* Semester Header */}
                     <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3 text-center shadow-[0_2px_4px_rgba(0,0,0,0.01)] select-none">
                       <span className="font-extrabold text-[10px] text-slate-400 block uppercase tracking-wider">

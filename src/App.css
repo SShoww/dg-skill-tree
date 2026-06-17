@@ -183,10 +183,10 @@
   }
 }
 
-/* Custom scrollbar for semester columns */
+/* Custom scrollbar override for semester columns to allow visual overflow */
 .semester-col-scrollable {
-  max-height: 480px;
-  overflow-y: auto;
+  max-height: none !important;
+  overflow: visible !important;
   padding-right: 4px;
 }
 
@@ -204,6 +204,24 @@
 }
 .semester-col-scrollable::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Prevent clipping of scaled course cards by outer containers */
+.semester-column-container,
+[id^="course-card-"],
+.course-card-wrapper {
+  overflow: visible !important;
+}
+
+/* Course Card Hover Scaling & Pop Effect (Timeline Only) */
+.timeline-scroll-container .course-card {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease !important;
+}
+
+.timeline-scroll-container .course-card:hover {
+  transform: scale(1.05) !important;
+  z-index: 100 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Course Card Responsive Styles */
