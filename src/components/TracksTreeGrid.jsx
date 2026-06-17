@@ -724,7 +724,7 @@ export default function TracksTreeGrid({
             id: `e-${preCode}-${course.code}`,
             source: preCode,
             target: course.code,
-            type: 'smoothstep', // Orthogonal step line with rounded corners
+            type: 'default', // Smooth Bezier curves
             sourceHandle: 'source-right',
             targetHandle: 'target-left',
             animated,

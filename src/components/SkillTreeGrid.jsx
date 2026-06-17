@@ -136,7 +136,7 @@ export default function SkillTreeGrid({
           
           const x1 = preRect.right - svgRect.left;
           const y1 = preRect.top + preRect.height / 2 - svgRect.top;
-          const x2 = selRect.left - svgRect.left - 6; // Offset slightly for arrowhead
+          const x2 = selRect.left - svgRect.left - 10; // Offset slightly for arrowhead
           const y2 = selRect.top + selRect.height / 2 - svgRect.top;
           
           // Determine connection type:
@@ -208,41 +208,12 @@ export default function SkillTreeGrid({
   }, [updateConnectionLines, completedCourses, unlockedCourses, windowWidth, activeFocusCode]);
 
   const getCurvePath = (x1, y1, x2, y2) => {
-    const R = 12; // border-radius size
-    const xMid = (x1 + x2) / 2;
-    
-    if (Math.abs(y1 - y2) < 2) {
-      return `M ${x1} ${y1} L ${x2} ${y2}`;
-    }
-    
-    const dirY = y2 > y1 ? 1 : -1;
-    const dirX = x2 > x1 ? 1 : -1;
-    
-    // Calculate dynamic radius to prevent overlaps if distance is too small
-    const r = Math.min(R, Math.abs(xMid - x1), Math.abs(y2 - y1) / 2);
-    
-    if (r <= 0) {
-      return `M ${x1} ${y1} L ${xMid} ${y1} L ${xMid} ${y2} L ${x2} ${y2}`;
-    }
-    
-    const p1_x = xMid - r * dirX;
-    const p1_y = y1;
-    
-    const p2_x = xMid;
-    const p2_y = y1 + r * dirY;
-    
-    const p3_x = xMid;
-    const p3_y = y2 - r * dirY;
-    
-    const p4_x = xMid + r * dirX;
-    const p4_y = y2;
-    
-    return `M ${x1} ${y1} ` +
-           `L ${p1_x} ${p1_y} ` +
-           `Q ${xMid} ${y1} ${p2_x} ${p2_y} ` +
-           `L ${p3_x} ${p3_y} ` +
-           `Q ${xMid} ${y2} ${p4_x} ${p4_y} ` +
-           `L ${x2} ${p4_y}`;
+    const dx = Math.abs(x2 - x1);
+    const cx1 = x1 + dx * 0.45;
+    const cy1 = y1;
+    const cx2 = x2 - dx * 0.45;
+    const cy2 = y2;
+    return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
   };
 
   const handleContainerClick = (e) => {
@@ -422,8 +393,8 @@ export default function SkillTreeGrid({
             {/* SVG Overlay */}
             <svg 
               ref={svgRef}
-              className="absolute inset-0 pointer-events-none w-full h-full z-10"
-              style={{ minWidth: '1650px' }}
+              className="absolute inset-0 pointer-events-none w-full h-full z-[999]"
+              style={{ minWidth: '1800px' }}
             >
               <defs>
                 <filter id="glow-red-s" x="-20%" y="-20%" width="140%" height="140%">
@@ -461,8 +432,8 @@ export default function SkillTreeGrid({
 
             {/* 8 Columns Grid */}
             <div 
-              className="grid grid-cols-8 gap-5 relative z-20"
-              style={{ minWidth: '1650px' }}
+              className="grid grid-cols-8 gap-8 relative z-10"
+              style={{ minWidth: '1800px' }}
             >
               {semesters.map((sem, idx) => {
                 const semCourses = studyPlanCourses.filter(
