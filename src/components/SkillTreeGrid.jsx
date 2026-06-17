@@ -208,10 +208,12 @@ export default function SkillTreeGrid({
   }, [updateConnectionLines, completedCourses, unlockedCourses, windowWidth, activeFocusCode]);
 
   const getCurvePath = (x1, y1, x2, y2) => {
-    const dx = Math.abs(x2 - x1);
-    const cx1 = x1 + dx * 0.45;
+    const actualDx = x2 - x1;
+    const direction = actualDx >= 0 ? 1 : -1;
+    const controlDx = Math.max(Math.abs(actualDx), 100) * direction;
+    const cx1 = x1 + controlDx * 0.45;
     const cy1 = y1;
-    const cx2 = x2 - dx * 0.45;
+    const cx2 = x2 - controlDx * 0.45;
     const cy2 = y2;
     return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
   };
@@ -393,8 +395,16 @@ export default function SkillTreeGrid({
             {/* SVG Overlay */}
             <svg 
               ref={svgRef}
-              className="absolute inset-0 pointer-events-none w-full h-full z-[999]"
-              style={{ minWidth: '1800px' }}
+              className="absolute pointer-events-none"
+              style={{ 
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: 999,
+                minWidth: '1800px',
+                overflow: 'visible'
+              }}
             >
               <defs>
                 <filter id="glow-red-s" x="-20%" y="-20%" width="140%" height="140%">
