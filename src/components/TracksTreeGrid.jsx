@@ -165,6 +165,8 @@ const CourseNode = ({ data }) => {
         missingPrereqs={data.missingPrereqs}
         isOrPrereq={data.isOrPrereq}
         onClick={data.onClick}
+        onDoubleClick={data.onDoubleClick}
+        onOpenDetails={data.onOpenDetails}
         onToggleComplete={data.onToggleComplete}
         selectedGeElectives={data.selectedGeElectives}
         onSelectGeElective={data.onSelectGeElective}
