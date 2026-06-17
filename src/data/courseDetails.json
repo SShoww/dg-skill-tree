@@ -389,7 +389,7 @@
     "courseNameTH": "การเขียนโปรแกรมคอมพิวเตอร์กราฟิก",
     "courseNameEN": "Computer Graphics Programming",
     "categoryTag": "Core Courses",
-    "descriptionTH": "แนะนำภาษาการเขียนโปรแกรมกราฟิก จุดและเส้น โพลิกอน การแปลง การกำหนดกล้อง การให้ แสง การสร้างผิวเสมือนจริง การสร้างหมอกแบบง่าย เทคนิคการทำแอนนิเมชันแบบง่าย เทคนิคการเขียนเกมแบบ ง่าย",
+    "descriptionTH": "แนะนำภาษาการเขียนโปรแกรมกราฟิก จุดและเส้น โพลิกอน การแปลง การกำหนดกล้อง การให้แสง การสร้างผิวเสมือนจริง การสร้างหมอกแบบง่าย เทคนิคการทำแอนนิเมชันแบบง่าย เทคนิคการเขียนเกมแบบง่าย",
     "descriptionEN": "Introduction to graphics programming languages. Points and lines. Polygons. Transformation. Camera setting. Lighting. Texture mapping. Basic fog generation. Basic animation techniques. Basic game programming.",
     "credits": {
       "total": 3,
