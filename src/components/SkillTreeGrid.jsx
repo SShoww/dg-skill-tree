@@ -109,6 +109,7 @@ export default function SkillTreeGrid({
   }, [courses]);
 
   const activeFocusCode = hoveredCourseCode || highlightedCourseCode || selectedCourseCode;
+  const isSelectionLocked = highlightedCourseCode !== null || selectedCourseCode !== null;
   
   // Memoized chains of focus
   const activePredecessors = useMemo(() => activeFocusCode ? getPredecessors(activeFocusCode) : [], [activeFocusCode, getPredecessors]);
@@ -466,8 +467,8 @@ export default function SkillTreeGrid({
                               onSelectMajorElective={onSelectMajorElective}
                               selectedFreeElectives={selectedFreeElectives}
                               onSelectFreeElective={onSelectFreeElective}
-                              onHoverStart={(code) => { if (!isTouchDevice) setHoveredCourseCode(code); }}
-                              onHoverEnd={() => { if (!isTouchDevice) setHoveredCourseCode(null); }}
+                              onHoverStart={(code) => { if (!isTouchDevice && !isSelectionLocked) setHoveredCourseCode(code); }}
+                              onHoverEnd={() => { if (!isTouchDevice && !isSelectionLocked) setHoveredCourseCode(null); }}
                               highlightType={highlightType}
                               isDimmed={isDimmed}
                               isMobileGrid={true}
@@ -484,7 +485,7 @@ export default function SkillTreeGrid({
         ) : (
           <div 
             ref={containerRef}
-            className="relative overflow-x-auto pb-12 scroll-smooth timeline-scroll-container"
+            className={`relative overflow-x-auto pb-12 scroll-smooth timeline-scroll-container ${isSelectionLocked ? 'hover-locked' : ''}`}
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <div className="relative" style={{ minWidth: '1880px', width: '100%' }}>
@@ -639,8 +640,8 @@ export default function SkillTreeGrid({
                                onSelectMajorElective={onSelectMajorElective}
                                selectedFreeElectives={selectedFreeElectives}
                                onSelectFreeElective={onSelectFreeElective}
-                               onHoverStart={(code) => { if (!isTouchDevice) setHoveredCourseCode(code); }}
-                               onHoverEnd={() => { if (!isTouchDevice) setHoveredCourseCode(null); }}
+                               onHoverStart={(code) => { if (!isTouchDevice && !isSelectionLocked) setHoveredCourseCode(code); }}
+                               onHoverEnd={() => { if (!isTouchDevice && !isSelectionLocked) setHoveredCourseCode(null); }}
                                highlightType={highlightType}
                                isDimmed={isDimmed}
                                isTimeline={true}

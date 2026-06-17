@@ -428,6 +428,7 @@ export default function TracksTreeGrid({
   }, []);
 
   const activeFocusCode = hoveredCourseCode || highlightedCourseCode || selectedCourseCode;
+  const isSelectionLocked = highlightedCourseCode !== null || selectedCourseCode !== null;
   
   // Memoized chains of focus
   const activePredecessors = useMemo(() => activeFocusCode ? getPredecessors(activeFocusCode) : [], [activeFocusCode, getPredecessors]);
@@ -652,8 +653,8 @@ export default function TracksTreeGrid({
               onSelectMajorElective,
               selectedFreeElectives,
               onSelectFreeElective,
-              onHoverStart: (code) => { if (!isTouchDevice) setHoveredCourseCode(code); },
-              onHoverEnd: () => { if (!isTouchDevice) setHoveredCourseCode(null); },
+              onHoverStart: (code) => { if (!isTouchDevice && !isSelectionLocked) setHoveredCourseCode(code); },
+              onHoverEnd: () => { if (!isTouchDevice && !isSelectionLocked) setHoveredCourseCode(null); },
               highlightType,
               isDimmed
             },

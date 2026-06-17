@@ -62,6 +62,8 @@ export default function App() {
   // 2. State: Selected course code (for details modal)
   const [selectedCourseCode, setSelectedCourseCode] = useState(null);
 
+  const isSelectionLocked = highlightedCourseCode !== null || selectedCourseCode !== null;
+
   // 3. State: Current View ('semester' | 'tracks')
   const [currentView, setCurrentView] = useState('tracks'); // Default to Tracks Flowchart
 
@@ -1154,8 +1156,8 @@ export default function App() {
                             isOrPrereq={isOr}
                             onClick={() => setSelectedCourseCode(course.code)}
                             onToggleComplete={handleToggleComplete}
-                            onHoverStart={setHoveredCourseCode}
-                            onHoverEnd={() => setHoveredCourseCode(null)}
+                            onHoverStart={(code) => { if (!isSelectionLocked) setHoveredCourseCode(code); }}
+                            onHoverEnd={() => { if (!isSelectionLocked) setHoveredCourseCode(null); }}
                             isDimmed={isAlreadyAssigned}
                           />
                         </div>

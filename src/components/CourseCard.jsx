@@ -58,31 +58,54 @@ export default function CourseCard({
 
   // Category Color and Theme configurations
   const getCategoryStyles = (category) => {
-    if (isAssignedMajorElective) {
-      return { borderLColor: '#0d9488', bgColor: isDarkMode ? '#052e2b' : '#f0fdfa', tagColor: 'teal' };
+    const isGe = category === 'GE_Required' || category === 'GE_Elective' || (isGeElectiveSlot && selectedGeSubCode);
+    const isCoreOrMajorReq = category === 'Core' || category === 'Major_Required';
+    const isMajorElec = category === 'Major_Elective' || isAssignedMajorElective;
+    const isFreeElec = category === 'Free_Elective' || (isFreeElectiveSlot && selectedFreeSubCode);
+
+    if (isGe) {
+      return {
+        borderLColor: isDarkMode ? '#c084fc' : '#a855f7',
+        bgClass: 'bg-purple-50/60 dark:bg-purple-950/30 hover:bg-purple-100/70 dark:hover:bg-purple-900/40',
+        bgSelectedClass: 'bg-purple-100/80 dark:bg-purple-900/50',
+        textClass: 'text-purple-900 dark:text-purple-200',
+        tagColor: 'purple'
+      };
     }
-    if (isGeElectiveSlot && selectedGeSubCode) {
-      return { borderLColor: '#a855f7', bgColor: isDarkMode ? '#220b45' : '#faf5ff', tagColor: 'purple' };
+    if (isCoreOrMajorReq) {
+      return {
+        borderLColor: isDarkMode ? '#60a5fa' : '#2563eb',
+        bgClass: 'bg-blue-50/60 dark:bg-blue-950/30 hover:bg-blue-100/70 dark:hover:bg-blue-900/40',
+        bgSelectedClass: 'bg-blue-100/80 dark:bg-blue-900/50',
+        textClass: 'text-blue-900 dark:text-blue-200',
+        tagColor: 'blue'
+      };
     }
-    if (isFreeElectiveSlot && selectedFreeSubCode) {
-      return { borderLColor: '#f59e0b', bgColor: isDarkMode ? '#381602' : '#fffbeb', tagColor: 'warning' };
+    if (isMajorElec) {
+      return {
+        borderLColor: isDarkMode ? '#2dd4bf' : '#14b8a6',
+        bgClass: 'bg-teal-50/50 dark:bg-teal-950/20 hover:bg-teal-100/60 dark:hover:bg-teal-900/30',
+        bgSelectedClass: 'bg-teal-100/70 dark:bg-teal-900/40',
+        textClass: 'text-teal-900 dark:text-teal-200',
+        tagColor: 'teal'
+      };
     }
-    switch (category) {
-      case 'GE_Required': 
-        return { borderLColor: '#8b5cf6', bgColor: isDarkMode ? '#220b45' : '#faf5ff', tagColor: 'purple' };
-      case 'GE_Elective': 
-        return { borderLColor: '#a78bfa', bgColor: isDarkMode ? '#171138' : '#faf9ff', tagColor: 'purple' };
-      case 'Core': 
-        return { borderLColor: '#5b44e4', bgColor: isDarkMode ? '#1a163a' : '#f5f3ff', tagColor: 'geekblue' };
-      case 'Major_Required': 
-        return { borderLColor: '#3b82f6', bgColor: isDarkMode ? '#0d182e' : '#eff6ff', tagColor: 'blue' };
-      case 'Major_Elective': 
-        return { borderLColor: '#10b981', bgColor: isDarkMode ? '#05291b' : '#ecfdf5', tagColor: 'emerald' };
-      case 'Free_Elective': 
-        return { borderLColor: '#f59e0b', bgColor: isDarkMode ? '#381602' : '#fffbeb', tagColor: 'warning' };
-      default: 
-        return { borderLColor: '#64748b', bgColor: isDarkMode ? '#1c1c1e' : '#f8fafc', tagColor: 'default' };
+    if (isFreeElec) {
+      return {
+        borderLColor: isDarkMode ? '#fbbf24' : '#f59e0b',
+        bgClass: 'bg-amber-50/50 dark:bg-amber-950/20 hover:bg-amber-100/60 dark:hover:bg-amber-900/30',
+        bgSelectedClass: 'bg-amber-100/70 dark:bg-amber-900/40',
+        textClass: 'text-amber-900 dark:text-amber-200',
+        tagColor: 'warning'
+      };
     }
+    return {
+      borderLColor: isDarkMode ? '#a1a1aa' : '#94a3b8',
+      bgClass: 'bg-slate-50/50 dark:bg-zinc-900/50 hover:bg-slate-100/60 dark:hover:bg-zinc-800/60',
+      bgSelectedClass: 'bg-slate-100/70 dark:bg-zinc-800/60',
+      textClass: 'text-slate-900 dark:text-zinc-200',
+      tagColor: 'default'
+    };
   };
 
   const catStyle = getCategoryStyles(course.category);
@@ -102,7 +125,7 @@ export default function CourseCard({
       return { border: '2px solid #f59e0b', boxShadow: '0 2px 6px rgba(245, 158, 11, 0.12)', scale: 'scale(1)' };
     }
     if (isCompleted) {
-      return { border: isDarkMode ? '1px solid #064e3b' : '1px solid #a7f3d0', boxShadow: 'none', scale: 'scale(1)' };
+      return { border: '2px solid #10b981', boxShadow: isDarkMode ? '0 0 8px rgba(16, 185, 129, 0.2)' : '0 0 8px rgba(16, 185, 129, 0.15)', scale: 'scale(1)' };
     }
     if (!isUnlocked) {
       return { border: isDarkMode ? '1px solid #27272a' : '1px solid #e2e8f0', boxShadow: 'none', scale: 'scale(1)' };
@@ -166,6 +189,10 @@ export default function CourseCard({
     </div>
   );
 
+  const completedBg = isDarkMode 
+    ? 'linear-gradient(135deg, #022c22 0%, #064e3b 100%)' 
+    : 'linear-gradient(135deg, #f0fdfa 0%, #dcfce7 100%)';
+
   return (
     <Tooltip 
       title={tooltipContent} 
@@ -177,7 +204,7 @@ export default function CourseCard({
         onDoubleClick={onDoubleClick}
         onMouseEnter={() => onHoverStart && onHoverStart(course.code)}
         onMouseLeave={() => onHoverEnd && onHoverEnd()}
-        className={`course-card course-card-wrapper transition-all duration-200 cursor-pointer ${opacityClass}`}
+        className={`course-card course-card-wrapper transition-all duration-200 cursor-pointer ${opacityClass} ${isCompleted ? 'completed-card' : ''}`}
         style={{
           transform: borderStyle.scale,
           transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -188,17 +215,19 @@ export default function CourseCard({
       >
         <Card
           size="small"
-          className={`course-card-card${isMobileGrid ? ' mobile-grid-card' : ''}`}
+          className={`course-card-card ${isMobileGrid ? 'mobile-grid-card' : ''} ${
+            isCompleted ? '' : (isSelected || highlightType === 'selected' ? catStyle.bgSelectedClass : catStyle.bgClass)
+          }`}
           style={{
             borderRadius: isMobileGrid ? '10px' : '8px',
+            borderStyle: 'solid',
+            borderWidth: borderStyle.border.split(' ')[0],
             borderLeftWidth: '4px',
             borderLeftColor: catStyle.borderLColor,
-            borderStyle: 'solid',
             borderTopColor: borderStyle.border.split(' ')[2],
             borderRightColor: borderStyle.border.split(' ')[2],
             borderBottomColor: borderStyle.border.split(' ')[2],
-            borderWidth: borderStyle.border.split(' ')[0],
-            backgroundColor: catStyle.bgColor,
+            background: isCompleted ? completedBg : undefined,
             boxShadow: isMobileGrid
               ? (borderStyle.boxShadow !== 'none' ? borderStyle.boxShadow : '0 1px 4px rgba(0,0,0,0.06)')
               : borderStyle.boxShadow,
@@ -241,8 +270,10 @@ export default function CourseCard({
                 </span>
               )}
             </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={(e) => e.stopPropagation()}>
+              {isCompleted && (
+                <CheckCircleFilled style={{ color: '#10b981', fontSize: '11px', marginRight: '2px' }} />
+              )}
               {hasActiveCareerFocus && isCareerRecommended && (
                 <Badge status="processing" color="gold" style={{ marginRight: '2px' }} />
               )}
@@ -265,8 +296,8 @@ export default function CourseCard({
           {/* Card Middle: Title */}
           <div style={{ margin: '2px 0', height: isTimeline ? '52px' : 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
             <div 
-              className="course-card-title-code"
-              style={{ fontSize: isMobileGrid ? '10px' : '11px', fontWeight: 800, color: isDarkMode ? '#f4f4f5' : '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
+              className={`course-card-title-code ${catStyle.textClass}`}
+              style={{ fontSize: isMobileGrid ? '10px' : '11px', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
             >
               {displayCourse.dept_code}
             </div>
@@ -277,11 +308,10 @@ export default function CourseCard({
               </div>
             ) : (
               <div 
-                className="course-card-title-text"
+                className={`course-card-title-text ${catStyle.textClass}`}
                 style={{ 
                   fontSize: isMobileGrid ? '9px' : '10px', 
                   fontWeight: 600, 
-                  color: isDarkMode ? '#e4e4e7' : '#475569', 
                   overflow: 'hidden', 
                   textOverflow: 'ellipsis', 
                   display: (isTimeline || isMobileGrid) ? '-webkit-box' : 'block',

@@ -218,7 +218,7 @@
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease !important;
 }
 
-.timeline-scroll-container .course-card:hover {
+.timeline-scroll-container:not(.hover-locked) .course-card:hover {
   transform: scale(1.05) !important;
   z-index: 100 !important;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
