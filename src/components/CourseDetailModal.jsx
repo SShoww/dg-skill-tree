@@ -14,6 +14,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { getPrepData } from '../data/coursePrepData';
 import { freeElectivesPool } from '../data/courses';
 import SyllabusTab from './SyllabusTab';
+import syllabusData from '../data/syllabusData.json';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -367,13 +368,20 @@ export default function CourseDetailModal({
               children: (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: '12px' }}>
                   {/* Course Description */}
-                  <div>
-                    <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0' }}>{t('course_overview')}</Title>
-                    <Paragraph style={{ color: '#475569', fontSize: '13px', lineHeight: '1.6', background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #f1f5f9', margin: 0 }}>
-                      <span style={{ fontStyle: 'italic', fontWeight: 600, display: 'block', marginBottom: '4px' }}>{displayCourse.title_th}</span>
-                      {displayCourse.description || t('no_description')}
-                    </Paragraph>
-                  </div>
+                  {(() => {
+                    const syllabus = syllabusData[displayCourse.code];
+                    const officialDesc = syllabus ? (isTh ? (syllabus.description_th || syllabus.description_en) : (syllabus.description_en || syllabus.description_th)) : null;
+                    const cleanOfficialDesc = officialDesc && !officialDesc.includes("No syllabus data") ? officialDesc : null;
+                    return (
+                      <div>
+                        <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0' }}>{t('course_overview')}</Title>
+                        <Paragraph style={{ color: '#475569', fontSize: '13px', lineHeight: '1.6', background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #f1f5f9', margin: 0 }}>
+                          <span style={{ fontStyle: 'italic', fontWeight: 600, display: 'block', marginBottom: '4px' }}>{displayCourse.title_th}</span>
+                          {displayCourse.description || cleanOfficialDesc || t('no_description')}
+                        </Paragraph>
+                      </div>
+                    );
+                  })()}
 
                   {/* Course Credits Grid */}
                   <Row gutter={[16, 16]}>
