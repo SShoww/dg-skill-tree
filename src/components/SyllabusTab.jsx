@@ -12,8 +12,19 @@ export default function SyllabusTab({ courseCode }) {
 
   const syllabus = syllabusData[courseCode];
 
+  let descTh = null;
+  let descEn = null;
+  if (syllabus) {
+    if (syllabus.description_th && !syllabus.description_th.includes("No syllabus data")) {
+      descTh = syllabus.description_th;
+    }
+    if (syllabus.description_en && !syllabus.description_en.includes("No syllabus data")) {
+      descEn = syllabus.description_en;
+    }
+  }
+
   // If no syllabus data at all or it's a placeholder / null
-  if (!syllabus || (!syllabus.description_en && !syllabus.description_th) || syllabus.description_en.includes("No syllabus data")) {
+  if (!syllabus || (!descTh && !descEn)) {
     return (
       <div style={{ padding: '24px 0', textAlign: 'center' }}>
         <Empty
@@ -57,11 +68,6 @@ export default function SyllabusTab({ courseCode }) {
     );
   }
 
-  // Active language text selection
-  const description = isTh 
-    ? (syllabus.description_th || syllabus.description_en) 
-    : (syllabus.description_en || syllabus.description_th);
-
   const hasClos = syllabus.clos && syllabus.clos.length > 0;
   const hasAssessment = syllabus.assessment && syllabus.assessment.length > 0;
 
@@ -89,7 +95,24 @@ export default function SyllabusTab({ courseCode }) {
           {isTh ? '📖 คำอธิบายลักษณะกระบวนวิชา (Course Description)' : '📖 Course Description'}
         </Title>
         <Paragraph style={{ color: '#475569', fontSize: '13px', lineHeight: '1.6', background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #f1f5f9', margin: 0 }}>
-          {description}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {descTh && (
+              <div>
+                <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                  {isTh ? 'ภาษาไทย (TH)' : 'Thai Description (TH)'}
+                </span>
+                <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descTh}</span>
+              </div>
+            )}
+            {descEn && (
+              <div>
+                <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                  {isTh ? 'ภาษาอังกฤษ (EN)' : 'English Description (EN)'}
+                </span>
+                <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descEn}</span>
+              </div>
+            )}
+          </div>
         </Paragraph>
       </div>
 

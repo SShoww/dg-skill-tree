@@ -370,14 +370,65 @@ export default function CourseDetailModal({
                   {/* Course Description */}
                   {(() => {
                     const syllabus = syllabusData[displayCourse.code];
-                    const officialDesc = syllabus ? (isTh ? (syllabus.description_th || syllabus.description_en) : (syllabus.description_en || syllabus.description_th)) : null;
-                    const cleanOfficialDesc = officialDesc && !officialDesc.includes("No syllabus data") ? officialDesc : null;
+                    let descTh = null;
+                    let descEn = null;
+                    if (syllabus) {
+                      if (syllabus.description_th && !syllabus.description_th.includes("No syllabus data")) {
+                        descTh = syllabus.description_th;
+                      }
+                      if (syllabus.description_en && !syllabus.description_en.includes("No syllabus data")) {
+                        descEn = syllabus.description_en;
+                      }
+                    }
+                    
+                    const hasSyllabusDesc = descTh || descEn;
+                    
                     return (
                       <div>
-                        <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0' }}>{t('course_overview')}</Title>
-                        <Paragraph style={{ color: '#475569', fontSize: '13px', lineHeight: '1.6', background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #f1f5f9', margin: 0 }}>
-                          <span style={{ fontStyle: 'italic', fontWeight: 600, display: 'block', marginBottom: '4px' }}>{displayCourse.title_th}</span>
-                          {displayCourse.description || cleanOfficialDesc || t('no_description')}
+                        <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0', fontSize: '14px', color: '#1e293b' }}>
+                          {t('course_overview')}
+                        </Title>
+                        <Paragraph style={{ color: '#475569', fontSize: '13px', lineHeight: '1.6', background: '#f8fafc', padding: '14px 16px', borderRadius: '8px', border: '1px solid #f1f5f9', margin: 0 }}>
+                          <span style={{ fontStyle: 'italic', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                            {isTh ? displayCourse.title_th : displayCourse.title_en}
+                            {displayCourse.title_en !== displayCourse.title_th && (
+                              <span style={{ color: '#94a3b8', fontWeight: 400, fontSize: '12px', display: 'block', marginTop: '2px' }}>
+                                ({isTh ? displayCourse.title_en : displayCourse.title_th})
+                              </span>
+                            )}
+                          </span>
+                          
+                          {displayCourse.code.includes('-EL-') && !selectedSubCode ? (
+                            t('no_description')
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px' }}>
+                              {descTh && (
+                                <div>
+                                  <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                                    {isTh ? 'ภาษาไทย (TH)' : 'Thai Description (TH)'}
+                                  </span>
+                                  <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descTh}</span>
+                                </div>
+                              )}
+                              
+                              {descEn && (
+                                <div>
+                                  <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                                    {isTh ? 'ภาษาอังกฤษ (EN)' : 'English Description (EN)'}
+                                  </span>
+                                  <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descEn}</span>
+                                </div>
+                              )}
+                              
+                              {!hasSyllabusDesc && displayCourse.description && (
+                                <div>{displayCourse.description}</div>
+                              )}
+                              
+                              {!hasSyllabusDesc && !displayCourse.description && (
+                                <span style={{ color: '#64748b', fontStyle: 'italic' }}>{t('no_description')}</span>
+                              )}
+                            </div>
+                          )}
                         </Paragraph>
                       </div>
                     );
