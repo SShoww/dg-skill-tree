@@ -249,13 +249,17 @@ export default function CourseCard({
           }`}
           style={{
             borderRadius: isMobileGrid ? '10px' : '8px',
+            // Use per-side border props exclusively — never mix borderWidth shorthand
+            // with borderLeftWidth/borderLeftColor, as it causes CSS reorder conflicts
             borderStyle: 'solid',
-            borderWidth: borderStyle.border.split(' ')[0],
+            borderTopWidth: borderStyle.border.split(' ')[0],
+            borderRightWidth: borderStyle.border.split(' ')[0],
+            borderBottomWidth: borderStyle.border.split(' ')[0],
             borderLeftWidth: '4px',
-            borderLeftColor: catStyle.borderLColor,
             borderTopColor: borderStyle.border.split(' ')[2],
             borderRightColor: borderStyle.border.split(' ')[2],
             borderBottomColor: borderStyle.border.split(' ')[2],
+            borderLeftColor: catStyle.borderLColor,
             background: isCompleted ? completedBg : undefined,
             boxShadow: isMobileGrid
               ? (borderStyle.boxShadow !== 'none' ? borderStyle.boxShadow : '0 1px 4px rgba(0,0,0,0.06)')
