@@ -58,54 +58,83 @@ export default function CourseCard({
 
   // Category Color and Theme configurations
   const getCategoryStyles = (category) => {
+    // Determine which category the course belongs to
     const isGe = category === 'GE_Required' || category === 'GE_Elective' || (isGeElectiveSlot && selectedGeSubCode);
-    const isCoreOrMajorReq = category === 'Core' || category === 'Major_Required';
+    const isCore = category === 'Core';
+    const isMajorReq = category === 'Major_Required';
     const isMajorElec = category === 'Major_Elective' || isAssignedMajorElective;
     const isFreeElec = category === 'Free_Elective' || (isFreeElectiveSlot && selectedFreeSubCode);
 
+    // build() now correctly picks bg based on isDarkMode
+    const build = (border, bgLight, bgLightHover, bgDark, bgDarkHover, bgSelLight, bgSelDark, textLight, textDark, tag) => ({
+      borderLColor: border,
+      bgClass: isDarkMode
+        ? `${bgDark} hover:${bgDarkHover}`
+        : `${bgLight} hover:${bgLightHover}`,
+      bgSelectedClass: isDarkMode ? bgSelDark : bgSelLight,
+      textClass: isDarkMode ? textDark : textLight,
+      tagColor: tag
+    });
+
     if (isGe) {
-      return {
-        borderLColor: isDarkMode ? '#c084fc' : '#a855f7',
-        bgClass: 'bg-purple-50/60 dark:bg-purple-950/30 hover:bg-purple-100/70 dark:hover:bg-purple-900/40',
-        bgSelectedClass: 'bg-purple-100/80 dark:bg-purple-900/50',
-        textClass: 'text-purple-900 dark:text-purple-200',
-        tagColor: 'purple'
-      };
+      return build(
+        isDarkMode ? '#c084fc' : '#a855f7',
+        'bg-[#f9f5fb]',       'bg-purple-100/60',
+        'bg-purple-950/20',   'bg-purple-900/40',
+        'bg-purple-100/80',   'bg-purple-900/50',
+        'text-purple-950',    'text-purple-300',
+        'purple'
+      );
     }
-    if (isCoreOrMajorReq) {
-      return {
-        borderLColor: isDarkMode ? '#60a5fa' : '#2563eb',
-        bgClass: 'bg-blue-50/60 dark:bg-blue-950/30 hover:bg-blue-100/70 dark:hover:bg-blue-900/40',
-        bgSelectedClass: 'bg-blue-100/80 dark:bg-blue-900/50',
-        textClass: 'text-blue-900 dark:text-blue-200',
-        tagColor: 'blue'
-      };
+    if (isCore) {
+      return build(
+        isDarkMode ? '#38bdf8' : '#0284c7',
+        'bg-[#eafaff]',       'bg-sky-100/60',
+        'bg-sky-950/20',      'bg-sky-900/40',
+        'bg-sky-100/80',      'bg-sky-900/50',
+        'text-sky-950',       'text-sky-300',
+        'sky'
+      );
+    }
+    if (isMajorReq) {
+      return build(
+        isDarkMode ? '#818cf8' : '#4f46e5',
+        'bg-[#f5f0ff]',       'bg-indigo-100/60',
+        'bg-indigo-950/20',   'bg-indigo-900/40',
+        'bg-indigo-100/80',   'bg-indigo-900/50',
+        'text-indigo-950',    'text-indigo-300',
+        'indigo'
+      );
     }
     if (isMajorElec) {
-      return {
-        borderLColor: isDarkMode ? '#2dd4bf' : '#14b8a6',
-        bgClass: 'bg-teal-50/50 dark:bg-teal-950/20 hover:bg-teal-100/60 dark:hover:bg-teal-900/30',
-        bgSelectedClass: 'bg-teal-100/70 dark:bg-teal-900/40',
-        textClass: 'text-teal-900 dark:text-teal-200',
-        tagColor: 'teal'
-      };
+      return build(
+        isDarkMode ? '#34d399' : '#059669',
+        'bg-[#f0fdf4]',       'bg-emerald-100/60',
+        'bg-emerald-950/20',  'bg-emerald-900/40',
+        'bg-emerald-100/80',  'bg-emerald-900/50',
+        'text-emerald-950',   'text-emerald-300',
+        'emerald'
+      );
     }
     if (isFreeElec) {
-      return {
-        borderLColor: isDarkMode ? '#fbbf24' : '#f59e0b',
-        bgClass: 'bg-amber-50/50 dark:bg-amber-950/20 hover:bg-amber-100/60 dark:hover:bg-amber-900/30',
-        bgSelectedClass: 'bg-amber-100/70 dark:bg-amber-900/40',
-        textClass: 'text-amber-900 dark:text-amber-200',
-        tagColor: 'warning'
-      };
+      return build(
+        isDarkMode ? '#fbbf24' : '#d97706',
+        'bg-[#fffbeb]',       'bg-amber-100/60',
+        'bg-amber-950/20',    'bg-amber-900/40',
+        'bg-amber-100/80',    'bg-amber-900/50',
+        'text-amber-950',     'text-amber-300',
+        'amber'
+      );
     }
-    return {
-      borderLColor: isDarkMode ? '#a1a1aa' : '#94a3b8',
-      bgClass: 'bg-slate-50/50 dark:bg-zinc-900/50 hover:bg-slate-100/60 dark:hover:bg-zinc-800/60',
-      bgSelectedClass: 'bg-slate-100/70 dark:bg-zinc-800/60',
-      textClass: 'text-slate-900 dark:text-zinc-200',
-      tagColor: 'default'
-    };
+    // Fallback
+    return build(
+      isDarkMode ? '#a1a1aa' : '#94a3b8',
+      'bg-slate-50/50',     'bg-slate-100/60',
+      'bg-zinc-900/50',     'bg-zinc-800/60',
+      'bg-slate-100/70',    'bg-zinc-800/60',
+      'text-slate-900',     'text-zinc-300',
+      'default'
+    );
   };
 
   const catStyle = getCategoryStyles(course.category);

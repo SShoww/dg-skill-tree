@@ -396,10 +396,10 @@ export default function CourseDetailModal({
                           {t('course_overview')}
                         </Title>
                         <Paragraph style={{ color: isDarkMode ? '#d4d4d8' : '#475569', fontSize: '13px', lineHeight: '1.6', background: isDarkMode ? '#1f1f23' : '#f8fafc', padding: '14px 16px', borderRadius: '8px', border: isDarkMode ? '1px solid #27272a' : '1px solid #f1f5f9', margin: 0 }}>
-                          <span style={{ fontStyle: 'italic', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                          <span style={{ fontStyle: 'italic', fontWeight: 600, display: 'block', marginBottom: '8px', color: isDarkMode ? '#e4e4e7' : undefined }}>
                             {isTh ? displayCourse.title_th : displayCourse.title_en}
                             {displayCourse.title_en !== displayCourse.title_th && (
-                              <span style={{ color: '#94a3b8', fontWeight: 400, fontSize: '12px', display: 'block', marginTop: '2px' }}>
+                              <span style={{ color: isDarkMode ? '#71717a' : '#94a3b8', fontWeight: 400, fontSize: '12px', display: 'block', marginTop: '2px' }}>
                                 ({isTh ? displayCourse.title_en : displayCourse.title_th})
                               </span>
                             )}
@@ -412,40 +412,40 @@ export default function CourseDetailModal({
                               {descTh && descEn && descTh !== descEn && (
                                 <>
                                   <div>
-                                    <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                                    <span style={{ fontWeight: 800, fontSize: '10px', color: isDarkMode ? '#818cf8' : '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
                                       {isTh ? 'ภาษาไทย (TH)' : 'Thai Description (TH)'}
                                     </span>
-                                    <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descTh}</span>
+                                    <span style={{ color: isDarkMode ? '#c4c4c8' : '#334155', display: 'block', textIndent: '20px' }}>{descTh}</span>
                                   </div>
                                   <div>
-                                    <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                                    <span style={{ fontWeight: 800, fontSize: '10px', color: isDarkMode ? '#818cf8' : '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
                                       {isTh ? 'ภาษาอังกฤษ (EN)' : 'English Description (EN)'}
                                     </span>
-                                    <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descEn}</span>
+                                    <span style={{ color: isDarkMode ? '#c4c4c8' : '#334155', display: 'block', textIndent: '20px' }}>{descEn}</span>
                                   </div>
                                 </>
                               )}
                               
                               {descTh && (!descEn || descTh === descEn) && (
                                 <div>
-                                  <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                                  <span style={{ fontWeight: 800, fontSize: '10px', color: isDarkMode ? '#818cf8' : '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
                                     {isTh ? 'คำอธิบายลักษณะกระบวนวิชา' : 'Course Description'}
                                   </span>
-                                  <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descTh}</span>
+                                  <span style={{ color: isDarkMode ? '#c4c4c8' : '#334155', display: 'block', textIndent: '20px' }}>{descTh}</span>
                                 </div>
                               )}
                               
                               {!descTh && descEn && (
                                 <div>
-                                  <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                                  <span style={{ fontWeight: 800, fontSize: '10px', color: isDarkMode ? '#818cf8' : '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
                                     {isTh ? 'คำอธิบายลักษณะกระบวนวิชา (EN)' : 'Course Description (EN)'}
                                   </span>
-                                  <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descEn}</span>
+                                  <span style={{ color: isDarkMode ? '#c4c4c8' : '#334155', display: 'block', textIndent: '20px' }}>{descEn}</span>
                                 </div>
                               )}
                               
                               {!hasSyllabusDesc && (
-                                <span style={{ color: '#64748b', fontStyle: 'italic' }}>{t('no_description')}</span>
+                                <span style={{ color: isDarkMode ? '#71717a' : '#64748b', fontStyle: 'italic' }}>{t('no_description')}</span>
                               )}
                             </div>
                           )}
@@ -457,45 +457,45 @@ export default function CourseDetailModal({
                   {/* Course Credits Grid */}
                   <Row gutter={[16, 16]}>
                     <Col span={6}>
-                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{isTh ? 'หน่วยกิตทั้งหมด' : 'Total Credits'}</span>
-                        <div style={{ fontSize: '16px', fontWeight: 900, color: '#1e293b' }}>{cd ? cd.total : course.credit_count}</div>
+                      <div style={{ background: isDarkMode ? '#27272a' : '#f8fafc', border: isDarkMode ? '1px solid #3f3f46' : '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: isDarkMode ? '#71717a' : '#94a3b8', textTransform: 'uppercase' }}>{isTh ? 'หน่วยกิตทั้งหมด' : 'Total Credits'}</span>
+                        <div style={{ fontSize: '16px', fontWeight: 900, color: isDarkMode ? '#f4f4f5' : '#1e293b' }}>{cd ? cd.total : course.credit_count}</div>
                       </div>
                     </Col>
                     <Col span={6}>
-                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{t('lecture_hours')}</span>
-                        <div style={{ fontSize: '16px', fontWeight: 700, color: '#475569' }}>{cd ? cd.lecture : '-'}</div>
+                      <div style={{ background: isDarkMode ? '#27272a' : '#f8fafc', border: isDarkMode ? '1px solid #3f3f46' : '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: isDarkMode ? '#71717a' : '#94a3b8', textTransform: 'uppercase' }}>{t('lecture_hours')}</span>
+                        <div style={{ fontSize: '16px', fontWeight: 700, color: isDarkMode ? '#d4d4d8' : '#475569' }}>{cd ? cd.lecture : '-'}</div>
                       </div>
                     </Col>
                     <Col span={6}>
-                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{t('lab_practice')}</span>
-                        <div style={{ fontSize: '16px', fontWeight: 700, color: '#475569' }}>{cd ? cd.lab : '-'}</div>
+                      <div style={{ background: isDarkMode ? '#27272a' : '#f8fafc', border: isDarkMode ? '1px solid #3f3f46' : '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: isDarkMode ? '#71717a' : '#94a3b8', textTransform: 'uppercase' }}>{t('lab_practice')}</span>
+                        <div style={{ fontSize: '16px', fontWeight: 700, color: isDarkMode ? '#d4d4d8' : '#475569' }}>{cd ? cd.lab : '-'}</div>
                       </div>
                     </Col>
                     <Col span={6}>
-                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{t('self_study')}</span>
-                        <div style={{ fontSize: '16px', fontWeight: 700, color: '#475569' }}>{cd ? cd.selfStudy : '-'}</div>
+                      <div style={{ background: isDarkMode ? '#27272a' : '#f8fafc', border: isDarkMode ? '1px solid #3f3f46' : '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: isDarkMode ? '#71717a' : '#94a3b8', textTransform: 'uppercase' }}>{t('self_study')}</span>
+                        <div style={{ fontSize: '16px', fontWeight: 700, color: isDarkMode ? '#d4d4d8' : '#475569' }}>{cd ? cd.selfStudy : '-'}</div>
                       </div>
                     </Col>
                   </Row>
 
                   {/* Enrichment Section: Learning Prep & Software */}
                   <Divider style={{ margin: '4px 0' }} />
-                  <div style={{ background: 'linear-gradient(to right, #f5f3ff, #f8fafc)', border: '1px solid #ddd6fe', borderRadius: '12px', padding: '16px' }}>
-                    <Title level={5} style={{ fontWeight: 800, color: '#5b21b6', margin: '0 0 12px 0' }} className="flex items-center gap-1.5">
+                  <div style={{ background: isDarkMode ? 'linear-gradient(to right, #1e1a2e, #1a1a1f)' : 'linear-gradient(to right, #f5f3ff, #f8fafc)', border: isDarkMode ? '1px solid #3b2f6a' : '1px solid #ddd6fe', borderRadius: '12px', padding: '16px' }}>
+                    <Title level={5} style={{ fontWeight: 800, color: isDarkMode ? '#a78bfa' : '#5b21b6', margin: '0 0 12px 0' }} className="flex items-center gap-1.5">
                       <ThunderboltOutlined /> {t('learning_prep_tips')}
                     </Title>
                     
-                    <Paragraph style={{ fontSize: '12.5px', color: '#4c1d95', fontWeight: 500, lineHeight: 1.5, marginBottom: '16px' }}>
+                    <Paragraph style={{ fontSize: '12.5px', color: isDarkMode ? '#c4b5fd' : '#4c1d95', fontWeight: 500, lineHeight: 1.5, marginBottom: '16px' }}>
                       {details.advisingTips || prepData.prep}
                     </Paragraph>
 
                     <Row gutter={[16, 16]}>
                       <Col xs={24} md={12}>
-                        <span style={{ fontSize: '10px', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: isDarkMode ? '#a78bfa' : '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
                           <ToolOutlined /> {t('recommended_software')}
                         </span>
                         {prepData.software.length > 0 ? (
@@ -505,12 +505,12 @@ export default function CourseDetailModal({
                             ))}
                           </Space>
                         ) : (
-                          <Text style={{ fontSize: '11px', color: '#6b7280', fontStyle: 'italic' }}>{t('no_software_needed')}</Text>
+                          <Text style={{ fontSize: '11px', color: isDarkMode ? '#71717a' : '#6b7280', fontStyle: 'italic' }}>{t('no_software_needed')}</Text>
                         )}
                       </Col>
 
                       <Col xs={24} md={12}>
-                        <span style={{ fontSize: '10px', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: isDarkMode ? '#a78bfa' : '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
                           <CompassOutlined /> {t('key_skills_concepts')}
                         </span>
                         {prepData.skills.length > 0 ? (
@@ -520,17 +520,17 @@ export default function CourseDetailModal({
                             ))}
                           </Space>
                         ) : (
-                          <Text style={{ fontSize: '11px', color: '#6b7280', fontStyle: 'italic' }}>{t('foundational_skills')}</Text>
+                          <Text style={{ fontSize: '11px', color: isDarkMode ? '#71717a' : '#6b7280', fontStyle: 'italic' }}>{t('foundational_skills')}</Text>
                         )}
                       </Col>
                     </Row>
 
                     {prepData.keywords.length > 0 && (
                       <div style={{ marginTop: '14px' }}>
-                        <span style={{ fontSize: '9px', fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{t('keywords')}</span>
+                        <span style={{ fontSize: '9px', fontWeight: 800, color: isDarkMode ? '#71717a' : '#6b7280', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{t('keywords')}</span>
                         <Space wrap size={[4, 4]}>
                           {prepData.keywords.map(kw => (
-                            <Tag key={kw} style={{ fontSize: '10px', color: '#4b5563', backgroundColor: '#f3f4f6', border: 'none', borderRadius: '4px' }}>#{kw}</Tag>
+                            <Tag key={kw} style={{ fontSize: '10px', color: isDarkMode ? '#a1a1aa' : '#4b5563', backgroundColor: isDarkMode ? '#27272a' : '#f3f4f6', border: 'none', borderRadius: '4px' }}>#{kw}</Tag>
                           ))}
                         </Space>
                       </div>
@@ -540,10 +540,10 @@ export default function CourseDetailModal({
                   {/* Prerequisites Checklist */}
                   <Divider style={{ margin: '4px 0' }} />
                   <div>
-                    <Title level={5} style={{ fontWeight: 800, margin: '0 0 12px 0' }}>{isTh ? 'วิชาบังคับก่อนที่ต้องเรียน (Prerequisites)' : 'Prerequisites Checklist'}</Title>
-                    <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '6px' }}>{isTh ? 'แผนผังบังคับก่อนที่เป็นทางการ:' : 'Official Mappings:'}</span>
-                      <Text style={{ fontSize: '12px', color: '#334155' }}>
+                    <Title level={5} style={{ fontWeight: 800, margin: '0 0 12px 0', color: isDarkMode ? '#f4f4f5' : undefined }}>{isTh ? 'วิชาบังคับก่อนที่ต้องเรียน (Prerequisites)' : 'Prerequisites Checklist'}</Title>
+                    <div style={{ background: isDarkMode ? '#1f1f23' : '#f8fafc', padding: '14px', borderRadius: '8px', border: isDarkMode ? '1px solid #27272a' : '1px solid #e2e8f0', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: isDarkMode ? '#a1a1aa' : '#64748b', display: 'block', marginBottom: '6px' }}>{isTh ? 'แผนผังบังคับก่อนที่เป็นทางการ:' : 'Official Mappings:'}</span>
+                      <Text style={{ fontSize: '12px', color: isDarkMode ? '#c4c4c8' : '#334155' }}>
                         {isTh ? (
                           <>
                             {displayCourse.prereq_text_th}
