@@ -30,7 +30,8 @@ export default function CourseCard({
   onHoverEnd,
   highlightType, // 'selected' | 'prereq' | 'unlock' | null
   isDimmed,
-  isTimeline = false
+  isTimeline = false,
+  isMobileGrid = false  // 2-column mobile grid mode: auto-height, 2-line title
 }) {
   const { language, t } = useTranslation();
   const isTh = language === 'th';
@@ -185,9 +186,9 @@ export default function CourseCard({
       >
         <Card
           size="small"
-          className="course-card-card"
+          className={`course-card-card${isMobileGrid ? ' mobile-grid-card' : ''}`}
           style={{
-            borderRadius: '8px',
+            borderRadius: isMobileGrid ? '10px' : '8px',
             borderLeftWidth: '4px',
             borderLeftColor: catStyle.borderLColor,
             borderStyle: 'solid',
@@ -196,9 +197,11 @@ export default function CourseCard({
             borderBottomColor: borderStyle.border.split(' ')[2],
             borderWidth: borderStyle.border.split(' ')[0],
             backgroundColor: catStyle.bgColor,
-            boxShadow: borderStyle.boxShadow,
-            height: isTimeline ? '120px' : '82px',
-            minHeight: isTimeline ? '120px' : '82px',
+            boxShadow: isMobileGrid
+              ? (borderStyle.boxShadow !== 'none' ? borderStyle.boxShadow : '0 1px 4px rgba(0,0,0,0.06)')
+              : borderStyle.boxShadow,
+            height: isMobileGrid ? 'auto' : (isTimeline ? '120px' : '82px'),
+            minHeight: isMobileGrid ? '90px' : (isTimeline ? '120px' : '82px'),
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
@@ -206,7 +209,7 @@ export default function CourseCard({
             overflow: 'hidden'
           }}
           bodyStyle={{ 
-            padding: isTimeline ? '8px 12px' : '6px 10px', 
+            padding: isMobileGrid ? '6px 8px' : (isTimeline ? '8px 12px' : '6px 10px'), 
             display: 'flex', 
             flexDirection: 'column', 
             justifyContent: 'space-between',
@@ -261,7 +264,7 @@ export default function CourseCard({
           <div style={{ margin: '2px 0', height: isTimeline ? '52px' : 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
             <div 
               className="course-card-title-code"
-              style={{ fontSize: '11px', fontWeight: 800, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
+              style={{ fontSize: isMobileGrid ? '10px' : '11px', fontWeight: 800, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
             >
               {displayCourse.dept_code}
             </div>
@@ -274,16 +277,16 @@ export default function CourseCard({
               <div 
                 className="course-card-title-text"
                 style={{ 
-                  fontSize: '10px', 
+                  fontSize: isMobileGrid ? '9px' : '10px', 
                   fontWeight: 600, 
                   color: '#475569', 
                   overflow: 'hidden', 
                   textOverflow: 'ellipsis', 
-                  display: isTimeline ? '-webkit-box' : 'block',
-                  WebkitLineClamp: isTimeline ? 3 : undefined,
-                  WebkitBoxOrient: isTimeline ? 'vertical' : undefined,
-                  whiteSpace: isTimeline ? 'normal' : 'nowrap',
-                  lineHeight: '1.25'
+                  display: (isTimeline || isMobileGrid) ? '-webkit-box' : 'block',
+                  WebkitLineClamp: isTimeline ? 3 : (isMobileGrid ? 2 : undefined),
+                  WebkitBoxOrient: (isTimeline || isMobileGrid) ? 'vertical' : undefined,
+                  whiteSpace: (isTimeline || isMobileGrid) ? 'normal' : 'nowrap',
+                  lineHeight: '1.3'
                 }} 
                 title={displayTitle}
               >

@@ -1,4 +1,4 @@
-import { Modal, Button, Tag, Divider, Alert, Space, Typography, Row, Col, Select } from 'antd';
+import { Modal, Button, Tag, Divider, Alert, Space, Typography, Row, Col, Select, Tabs } from 'antd';
 import { 
   CheckCircleOutlined, 
   LockOutlined, 
@@ -13,6 +13,7 @@ import {
 import { useTranslation } from '../context/LanguageContext';
 import { getPrepData } from '../data/coursePrepData';
 import { freeElectivesPool } from '../data/courses';
+import SyllabusTab from './SyllabusTab';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -153,58 +154,52 @@ export default function CourseDetailModal({
             <span style={{ fontSize: '11px', fontWeight: 800, color: '#d97706', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
               {isTh ? 'เลือกวิชาเลือกเสรี' : 'Select Free Elective Course'}
             </span>
-            <Select
-              showSearch
-              placeholder={isTh ? 'ค้นหาและเลือกวิชาเลือกเสรี...' : 'Search and select free elective...'}
-              optionFilterProp="children"
-              filterOption={(input, option) => {
-                const text = String(option.children || '').toLowerCase();
-                return text.includes(input.toLowerCase());
-              }}
-              value={selectedSubCode || undefined}
-              onChange={(val) => onSelectFreeElective(course.code, val || null)}
-              style={{ width: '100%', marginBottom: '12px' }}
-              allowClear
-              dropdownMatchSelectWidth={false}
-              dropdownRender={menu => (
-                <>
-                  {menu}
-                  <Divider style={{ margin: '8px 0' }} />
-                  <div style={{ padding: '0 8px 4px 8px', display: 'flex', justifyContent: 'center' }}>
-                    <a 
-                      href="https://cmu-review.vercel.app/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <CompassOutlined /> {isTh ? 'ดูรีวิววิชาที่ cmu-review.vercel.app' : 'See course reviews at cmu-review.vercel.app'}
-                    </a>
-                  </div>
-                </>
-              )}
-            >
-              {(() => {
-                const combinedPool = [
-                  ...freeElectivesPool,
-                  ...allCourses.filter(c => !c.code.includes('-EL-'))
-                ];
-                const uniquePool = Array.from(new Map(combinedPool.map(c => [c.code, c])).values());
-                const selectedElsewhere = Object.entries(selectedFreeElectives)
-                  .filter(([slot]) => slot !== course.code)
-                  .map(([, subCode]) => subCode);
-                
-                return uniquePool.map(opt => (
-                  <Select.Option 
-                    key={opt.code} 
-                    value={opt.code}
-                    disabled={selectedElsewhere.includes(opt.code)}
-                  >
-                    {opt.code} - {isTh ? opt.title_th : opt.title_en} ({opt.dept_code})
-                  </Select.Option>
-                ));
-              })()}
-            </Select>
+            {(() => {
+              const combinedPool = freeElectivesPool;
+              const uniquePool = Array.from(new Map(combinedPool.map(c => [c.code, c])).values());
+              const selectedElsewhere = Object.entries(selectedFreeElectives)
+                .filter(([slot]) => slot !== course.code)
+                .map(([, subCode]) => subCode);
+              
+              const selectOptions = uniquePool.map(opt => ({
+                value: opt.code,
+                label: `${opt.code} - ${isTh ? opt.title_th : opt.title_en} (${opt.dept_code})`,
+                disabled: selectedElsewhere.includes(opt.code)
+              }));
+
+              return (
+                <Select
+                  showSearch
+                  placeholder={isTh ? 'ค้นหาและเลือกวิชาเลือกเสรี...' : 'Search and select free elective...'}
+                  value={selectedSubCode || undefined}
+                  onChange={(val) => onSelectFreeElective(course.code, val || null)}
+                  style={{ width: '100%', marginBottom: '12px' }}
+                  allowClear
+                  dropdownMatchSelectWidth={false}
+                  options={selectOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  dropdownRender={menu => (
+                    <>
+                      {menu}
+                      <Divider style={{ margin: '8px 0' }} />
+                      <div style={{ padding: '0 8px 4px 8px', display: 'flex', justifyContent: 'center' }}>
+                        <a 
+                          href="https://cmu-review.vercel.app/" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <CompassOutlined /> {isTh ? 'ดูรีวิววิชาที่ cmu-review.vercel.app' : 'See course reviews at cmu-review.vercel.app'}
+                        </a>
+                      </div>
+                    </>
+                  )}
+                />
+              );
+            })()}
             
             {/* Banner recommendation link */}
             <div style={{ background: '#fffbeb', border: '1px dashed #fbbf24', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -363,197 +358,226 @@ export default function CourseDetailModal({
           )}
         </div>
 
-        {/* Course Description */}
-        <div style={{ marginBottom: '20px' }}>
-          <Title level={5} style={{ fontWeight: 800 }}>{t('course_overview')}</Title>
-          <Paragraph style={{ color: '#475569', fontSize: '13px', lineHeight: '1.6', background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-            <span style={{ fontStyle: 'italic', fontWeight: 600, display: 'block', marginBottom: '4px' }}>{displayCourse.title_th}</span>
-            {displayCourse.description || t('no_description')}
-          </Paragraph>
-        </div>
-
-        {/* Course Credits Grid */}
-        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-          <Col span={6}>
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{isTh ? 'หน่วยกิตทั้งหมด' : 'Total Credits'}</span>
-              <div style={{ fontSize: '16px', fontWeight: 900, color: '#1e293b' }}>{cd ? cd.total : course.credit_count}</div>
-            </div>
-          </Col>
-          <Col span={6}>
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{t('lecture_hours')}</span>
-              <div style={{ fontSize: '16px', fontWeight: 700, color: '#475569' }}>{cd ? cd.lecture : '-'}</div>
-            </div>
-          </Col>
-          <Col span={6}>
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{t('lab_practice')}</span>
-              <div style={{ fontSize: '16px', fontWeight: 700, color: '#475569' }}>{cd ? cd.lab : '-'}</div>
-            </div>
-          </Col>
-          <Col span={6}>
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{t('self_study')}</span>
-              <div style={{ fontSize: '16px', fontWeight: 700, color: '#475569' }}>{cd ? cd.selfStudy : '-'}</div>
-            </div>
-          </Col>
-        </Row>
-
-        {/* Enrichment Section: Learning Prep & Software */}
-        <Divider style={{ margin: '12px 0' }} />
-        <div style={{ background: 'linear-gradient(to right, #f5f3ff, #f8fafc)', border: '1px solid #ddd6fe', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
-          <Title level={5} style={{ fontWeight: 800, color: '#5b21b6', margin: '0 0 12px 0' }} className="flex items-center gap-1.5">
-            <ThunderboltOutlined /> {t('learning_prep_tips')}
-          </Title>
-          
-          <Paragraph style={{ fontSize: '12.5px', color: '#4c1d95', fontWeight: 500, lineHeight: 1.5, marginBottom: '16px' }}>
-            {prepData.prep}
-          </Paragraph>
-
-          <Row gutter={[16, 16]}>
-            <Col xs={24} md={12}>
-              <span style={{ fontSize: '10px', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
-                <ToolOutlined /> {t('recommended_software')}
-              </span>
-              {prepData.software.length > 0 ? (
-                <Space wrap size={[4, 8]}>
-                  {prepData.software.map(soft => (
-                    <Tag key={soft} color="purple" style={{ fontWeight: 700 }}>{soft}</Tag>
-                  ))}
-                </Space>
-              ) : (
-                <Text style={{ fontSize: '11px', color: '#6b7280', fontStyle: 'italic' }}>{t('no_software_needed')}</Text>
-              )}
-            </Col>
-
-            <Col xs={24} md={12}>
-              <span style={{ fontSize: '10px', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
-                <CompassOutlined /> {t('key_skills_concepts')}
-              </span>
-              {prepData.skills.length > 0 ? (
-                <Space wrap size={[4, 8]}>
-                  {prepData.skills.map(skill => (
-                    <Tag key={skill} color="processing" style={{ fontWeight: 700 }}>{skill}</Tag>
-                  ))}
-                </Space>
-              ) : (
-                <Text style={{ fontSize: '11px', color: '#6b7280', fontStyle: 'italic' }}>{t('foundational_skills')}</Text>
-              )}
-            </Col>
-          </Row>
-
-          {prepData.keywords.length > 0 && (
-            <div style={{ marginTop: '14px' }}>
-              <span style={{ fontSize: '9px', fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{t('keywords')}</span>
-              <Space wrap size={[4, 4]}>
-                {prepData.keywords.map(kw => (
-                  <Tag key={kw} style={{ fontSize: '10px', color: '#4b5563', backgroundColor: '#f3f4f6', border: 'none', borderRadius: '4px' }}>#{kw}</Tag>
-                ))}
-              </Space>
-            </div>
-          )}
-        </div>
-
-        {/* Prerequisites Checklist */}
-        <div style={{ marginBottom: '24px' }}>
-          <Title level={5} style={{ fontWeight: 800 }}>{isTh ? 'วิชาบังคับก่อนที่ต้องเรียน (Prerequisites)' : 'Prerequisites Checklist'}</Title>
-          <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '12px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '6px' }}>{isTh ? 'แผนผังบังคับก่อนที่เป็นทางการ:' : 'Official Mappings:'}</span>
-            <Text style={{ fontSize: '12px', color: '#334155' }}>
-              {isTh ? (
-                <>
-                  {displayCourse.prereq_text_th}
-                  {displayCourse.prereq_text_en !== displayCourse.prereq_text_th && (
-                    <span style={{ color: '#94a3b8', display: 'block', fontSize: '11px', marginTop: '2px' }}>({displayCourse.prereq_text_en})</span>
-                  )}
-                </>
-              ) : (
-                <>
-                  {displayCourse.prereq_text_en}
-                  {displayCourse.prereq_text_th !== displayCourse.prereq_text_en && (
-                    <span style={{ color: '#94a3b8', display: 'block', fontSize: '11px', marginTop: '2px' }}>({displayCourse.prereq_text_th})</span>
-                  )}
-                </>
-              )}
-            </Text>
-          </div>
-
-          {prereqObjects.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {prereqObjects.map(pr => {
-                const isCompletedPrereq = completedCourses.includes(pr.code);
-                return (
-                  <div 
-                    key={pr.code} 
-                    onClick={() => onSelectCourse(pr.code)}
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'space-between', 
-                      padding: '10px 14px', 
-                      background: '#ffffff',
-                      border: `1px solid ${isCompletedPrereq ? '#bbf7d0' : '#fecdd3'}`, 
-                      borderRadius: '8px', 
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.01)'
-                    }}
-                    className="hover:border-slate-400 transition-colors"
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      {isCompletedPrereq ? (
-                        <CheckCircleOutlined style={{ color: '#10b981', fontSize: '16px' }} />
-                      ) : (
-                        <LockOutlined style={{ color: '#ef4444', fontSize: '16px' }} />
-                      )}
-                      <div>
-                        <span style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: 800, color: '#64748b', background: '#f1f5f9', padding: '1px 6px', borderRadius: '3px', marginRight: '6px' }}>
-                          {pr.code}
-                        </span>
-                        <Text strong style={{ fontSize: '12.5px', color: '#1e293b' }}>
-                          {pr.dept_code} — {isTh ? pr.title_th : pr.title_en}
-                        </Text>
-                      </div>
-                    </div>
-                    
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: isCompletedPrereq ? '#10b981' : '#ef4444' }}>
-                      <span>{isCompletedPrereq ? (isTh ? 'เรียนผ่านแล้ว' : 'Completed') : (isTh ? 'รอดำเนินการ' : 'Pending')}</span>
-                      <ArrowRightOutlined style={{ color: '#94a3b8' }} />
-                    </div>
+        {/* Course Details Tabs */}
+        {(() => {
+          const tabItems = [
+            {
+              key: 'overview',
+              label: isTh ? '📖 รายละเอียดวิชา' : '📖 Overview',
+              children: (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: '12px' }}>
+                  {/* Course Description */}
+                  <div>
+                    <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0' }}>{t('course_overview')}</Title>
+                    <Paragraph style={{ color: '#475569', fontSize: '13px', lineHeight: '1.6', background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #f1f5f9', margin: 0 }}>
+                      <span style={{ fontStyle: 'italic', fontWeight: 600, display: 'block', marginBottom: '4px' }}>{displayCourse.title_th}</span>
+                      {displayCourse.description || t('no_description')}
+                    </Paragraph>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <Text type="secondary" style={{ fontStyle: 'italic', fontSize: '12px' }}>
-              {isTh ? 'รายวิชานี้ไม่มีวิชาบังคับก่อน คุณสามารถลงทะเบียนเรียนได้ทันที' : 'This course has no prerequisites. You can enroll in it at any time.'}
-            </Text>
-          )}
-        </div>
 
-        {/* Successor Unlocks */}
-        <div>
-          <Title level={5} style={{ fontWeight: 800 }}>{isTh ? 'วิชาในอนาคตที่สามารถปลดล็อกได้' : 'Future Courses Unlocked'}</Title>
-          {postReqs.length > 0 ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {postReqs.map(po => (
-                <Button 
-                  key={po.code} 
-                  size="small" 
-                  icon={<ArrowRightOutlined />} 
-                  onClick={() => onSelectCourse(po.code)}
-                  style={{ borderRadius: '6px', fontSize: '11.5px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}
-                >
-                  {po.dept_code} ({po.code})
-                </Button>
-              ))}
-            </div>
-          ) : (
-            <Text type="secondary" style={{ fontStyle: 'italic', fontSize: '12px' }}>
-              {isTh ? 'รายวิชานี้เป็นวิชาสิ้นสุดของหลักสูตร ไม่ปลดล็อกวิชาอื่นเพิ่มเติม (เช่น สหกิจศึกษา หรือ วิชาเฉพาะทางอิสระ)' : 'Does not unlock any specific courses. This is a terminal/capstone course or independent specialization.'}
-            </Text>
-          )}
-        </div>
+                  {/* Course Credits Grid */}
+                  <Row gutter={[16, 16]}>
+                    <Col span={6}>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{isTh ? 'หน่วยกิตทั้งหมด' : 'Total Credits'}</span>
+                        <div style={{ fontSize: '16px', fontWeight: 900, color: '#1e293b' }}>{cd ? cd.total : course.credit_count}</div>
+                      </div>
+                    </Col>
+                    <Col span={6}>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{t('lecture_hours')}</span>
+                        <div style={{ fontSize: '16px', fontWeight: 700, color: '#475569' }}>{cd ? cd.lecture : '-'}</div>
+                      </div>
+                    </Col>
+                    <Col span={6}>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{t('lab_practice')}</span>
+                        <div style={{ fontSize: '16px', fontWeight: 700, color: '#475569' }}>{cd ? cd.lab : '-'}</div>
+                      </div>
+                    </Col>
+                    <Col span={6}>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{t('self_study')}</span>
+                        <div style={{ fontSize: '16px', fontWeight: 700, color: '#475569' }}>{cd ? cd.selfStudy : '-'}</div>
+                      </div>
+                    </Col>
+                  </Row>
+
+                  {/* Enrichment Section: Learning Prep & Software */}
+                  <Divider style={{ margin: '4px 0' }} />
+                  <div style={{ background: 'linear-gradient(to right, #f5f3ff, #f8fafc)', border: '1px solid #ddd6fe', borderRadius: '12px', padding: '16px' }}>
+                    <Title level={5} style={{ fontWeight: 800, color: '#5b21b6', margin: '0 0 12px 0' }} className="flex items-center gap-1.5">
+                      <ThunderboltOutlined /> {t('learning_prep_tips')}
+                    </Title>
+                    
+                    <Paragraph style={{ fontSize: '12.5px', color: '#4c1d95', fontWeight: 500, lineHeight: 1.5, marginBottom: '16px' }}>
+                      {prepData.prep}
+                    </Paragraph>
+
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} md={12}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
+                          <ToolOutlined /> {t('recommended_software')}
+                        </span>
+                        {prepData.software.length > 0 ? (
+                          <Space wrap size={[4, 8]}>
+                            {prepData.software.map(soft => (
+                              <Tag key={soft} color="purple" style={{ fontWeight: 700 }}>{soft}</Tag>
+                            ))}
+                          </Space>
+                        ) : (
+                          <Text style={{ fontSize: '11px', color: '#6b7280', fontStyle: 'italic' }}>{t('no_software_needed')}</Text>
+                        )}
+                      </Col>
+
+                      <Col xs={24} md={12}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
+                          <CompassOutlined /> {t('key_skills_concepts')}
+                        </span>
+                        {prepData.skills.length > 0 ? (
+                          <Space wrap size={[4, 8]}>
+                            {prepData.skills.map(skill => (
+                              <Tag key={skill} color="processing" style={{ fontWeight: 700 }}>{skill}</Tag>
+                            ))}
+                          </Space>
+                        ) : (
+                          <Text style={{ fontSize: '11px', color: '#6b7280', fontStyle: 'italic' }}>{t('foundational_skills')}</Text>
+                        )}
+                      </Col>
+                    </Row>
+
+                    {prepData.keywords.length > 0 && (
+                      <div style={{ marginTop: '14px' }}>
+                        <span style={{ fontSize: '9px', fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{t('keywords')}</span>
+                        <Space wrap size={[4, 4]}>
+                          {prepData.keywords.map(kw => (
+                            <Tag key={kw} style={{ fontSize: '10px', color: '#4b5563', backgroundColor: '#f3f4f6', border: 'none', borderRadius: '4px' }}>#{kw}</Tag>
+                          ))}
+                        </Space>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Prerequisites Checklist */}
+                  <Divider style={{ margin: '4px 0' }} />
+                  <div>
+                    <Title level={5} style={{ fontWeight: 800, margin: '0 0 12px 0' }}>{isTh ? 'วิชาบังคับก่อนที่ต้องเรียน (Prerequisites)' : 'Prerequisites Checklist'}</Title>
+                    <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '6px' }}>{isTh ? 'แผนผังบังคับก่อนที่เป็นทางการ:' : 'Official Mappings:'}</span>
+                      <Text style={{ fontSize: '12px', color: '#334155' }}>
+                        {isTh ? (
+                          <>
+                            {displayCourse.prereq_text_th}
+                            {displayCourse.prereq_text_en !== displayCourse.prereq_text_th && (
+                              <span style={{ color: '#94a3b8', display: 'block', fontSize: '11px', marginTop: '2px' }}>({displayCourse.prereq_text_en})</span>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            {displayCourse.prereq_text_en}
+                            {displayCourse.prereq_text_th !== displayCourse.prereq_text_en && (
+                              <span style={{ color: '#94a3b8', display: 'block', fontSize: '11px', marginTop: '2px' }}>({displayCourse.prereq_text_th})</span>
+                            )}
+                          </>
+                        )}
+                      </Text>
+                    </div>
+
+                    {prereqObjects.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {prereqObjects.map(pr => {
+                          const isCompletedPrereq = completedCourses.includes(pr.code);
+                          return (
+                            <div 
+                              key={pr.code} 
+                              onClick={() => onSelectCourse(pr.code)}
+                              style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'space-between', 
+                                padding: '10px 14px', 
+                                background: '#ffffff',
+                                border: `1px solid ${isCompletedPrereq ? '#bbf7d0' : '#fecdd3'}`, 
+                                borderRadius: '8px', 
+                                cursor: 'pointer',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.01)'
+                              }}
+                              className="hover:border-slate-400 transition-colors"
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                {isCompletedPrereq ? (
+                                  <CheckCircleOutlined style={{ color: '#10b981', fontSize: '16px' }} />
+                                ) : (
+                                  <LockOutlined style={{ color: '#ef4444', fontSize: '16px' }} />
+                                )}
+                                <div>
+                                  <span style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: 800, color: '#64748b', background: '#f1f5f9', padding: '1px 6px', borderRadius: '3px', marginRight: '6px' }}>
+                                    {pr.code}
+                                  </span>
+                                  <Text strong style={{ fontSize: '12.5px', color: '#1e293b' }}>
+                                    {pr.dept_code} — {isTh ? pr.title_th : pr.title_en}
+                                  </Text>
+                                </div>
+                              </div>
+                              
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: isCompletedPrereq ? '#10b981' : '#ef4444' }}>
+                                <span>{isCompletedPrereq ? (isTh ? 'เรียนผ่านแล้ว' : 'Completed') : (isTh ? 'รอดำเนินการ' : 'Pending')}</span>
+                                <ArrowRightOutlined style={{ color: '#94a3b8' }} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <Text type="secondary" style={{ fontStyle: 'italic', fontSize: '12px' }}>
+                        {isTh ? 'รายวิชานี้ไม่มีวิชาบังคับก่อน คุณสามารถลงทะเบียนเรียนได้ทันที' : 'This course has no prerequisites. You can enroll in it at any time.'}
+                      </Text>
+                    )}
+                  </div>
+
+                  {/* Successor Unlocks */}
+                  <Divider style={{ margin: '4px 0' }} />
+                  <div>
+                    <Title level={5} style={{ fontWeight: 800, margin: '0 0 12px 0' }}>{isTh ? 'วิชาในอนาคตที่สามารถปลดล็อกได้' : 'Future Courses Unlocked'}</Title>
+                    {postReqs.length > 0 ? (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {postReqs.map(po => (
+                          <Button 
+                            key={po.code} 
+                            size="small" 
+                            icon={<ArrowRightOutlined />} 
+                            onClick={() => onSelectCourse(po.code)}
+                            style={{ borderRadius: '6px', fontSize: '11.5px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}
+                          >
+                            {po.dept_code} ({po.code})
+                          </Button>
+                        ))}
+                      </div>
+                    ) : (
+                      <Text type="secondary" style={{ fontStyle: 'italic', fontSize: '12px' }}>
+                        {isTh ? 'รายวิชานี้เป็นวิชาสิ้นสุดของหลักสูตร ไม่ปลดล็อกวิชาอื่นเพิ่มเติม (เช่น สหกิจศึกษา หรือ วิชาเฉพาะทางอิสระ)' : 'Does not unlock any specific courses. This is a terminal/capstone course or independent specialization.'}
+                      </Text>
+                    )}
+                  </div>
+                </div>
+              )
+            },
+            {
+              key: 'syllabus',
+              label: isTh ? '📋 ประมวลรายวิชา' : '📋 Syllabus',
+              children: <SyllabusTab courseCode={displayCourse.code} />
+            }
+          ];
+
+          return (
+            <Tabs 
+              defaultActiveKey="overview" 
+              items={tabItems} 
+              type="line"
+              style={{ marginTop: '8px' }}
+            />
+          );
+        })()}
       </div>
     </Modal>
   );

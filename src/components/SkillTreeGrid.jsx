@@ -389,8 +389,8 @@ export default function SkillTreeGrid({
                       </span>
                     </div>
 
-                    {/* Course Cards List */}
-                    <div className="space-y-3 w-full">
+                    {/* Course Cards — 2-column responsive grid on mobile */}
+                    <div className="grid grid-cols-2 gap-2">
                       {semCourses.map(course => {
                         const isCompleted = completedCourses.includes(course.code);
                         const isUnlocked = unlockedCourses.includes(course.code);
@@ -424,13 +424,13 @@ export default function SkillTreeGrid({
                             <div 
                               key={course.code} 
                               onClick={() => onAddMajorElectiveSlotClick && onAddMajorElectiveSlotClick(course.code)}
-                              className="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer transition-all duration-200"
-                              style={{ height: '120px', userSelect: 'none' }}
+                              className="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 rounded-xl p-2 flex flex-col justify-center items-center cursor-pointer transition-all duration-200"
+                              style={{ minHeight: '90px', userSelect: 'none' }}
                             >
-                              <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', textAlign: 'center' }}>
                                 <PlusOutlined style={{ fontSize: '11px' }} /> {isTh ? 'วิชาเอกเลือก' : 'Major Elective'}
                               </span>
-                              <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                              <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>
                                 {isTh ? 'คลิกเพื่อเลือกวิชา' : 'Click to Add Slot'}
                               </span>
                             </div>
@@ -468,7 +468,7 @@ export default function SkillTreeGrid({
                               onHoverEnd={() => { if (!isTouchDevice) setHoveredCourseCode(null); }}
                               highlightType={highlightType}
                               isDimmed={isDimmed}
-                              isTimeline={true}
+                              isMobileGrid={true}
                             />
                           </div>
                         );
