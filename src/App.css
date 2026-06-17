@@ -237,9 +237,31 @@
 
 /* Segmented view switcher mobile styling */
 @media (max-width: 640px) {
+  .view-switcher-segmented {
+    max-width: 100vw;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex !important;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .view-switcher-segmented::-webkit-scrollbar {
+    display: none;
+  }
+  .view-switcher-segmented .ant-segmented-group {
+    flex-wrap: nowrap !important;
+    width: max-content;
+  }
+  .view-switcher-segmented .ant-segmented-item {
+    min-width: 120px;
+    flex-shrink: 0;
+  }
   .view-switcher-segmented .ant-segmented-item-label {
-    font-size: 11.5px !important;
-    padding: 4px 8px !important;
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -260,5 +282,20 @@ html, body, #root {
   max-width: 100%;
   overflow-x: hidden;
   position: relative;
+}
+
+/* Custom Minimalist Scrollbar Design */
+.timeline-scroll-container::-webkit-scrollbar {
+  height: 6px; /* Ultra-thin height */
+}
+.timeline-scroll-container::-webkit-scrollbar-track {
+  background: transparent; /* Invisible track */
+}
+.timeline-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15); /* Soft, translucent pill */
+  border-radius: 10px;
+}
+.timeline-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 

@@ -331,18 +331,27 @@ export default function TracksTreeGrid({
     setHoveredCourseCode(null);
   }, [setHighlightedCourseCode, setHoveredCourseCode]);
 
-  // Resize listener to center flowchart
+  // Center initially
   useEffect(() => {
     if (!reactFlowInstance) return;
 
+    const getFitOptions = () => {
+      const isMobile = window.innerWidth < 768;
+      return {
+        padding: isMobile ? 0.3 : 0.2,
+        includeHiddenNodes: false,
+        duration: 400
+      };
+    };
+
     // Center initially
-    reactFlowInstance.fitView({ padding: 0.2, duration: 400 });
+    reactFlowInstance.fitView(getFitOptions());
 
     let resizeTimeout;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
-        reactFlowInstance.fitView({ padding: 0.2, duration: 400 });
+        reactFlowInstance.fitView(getFitOptions());
       }, 150);
     };
 
@@ -750,7 +759,15 @@ export default function TracksTreeGrid({
   // Viewport Zoom helper controls
   const handleZoomIn = () => reactFlowInstance && reactFlowInstance.zoomIn();
   const handleZoomOut = () => reactFlowInstance && reactFlowInstance.zoomOut();
-  const handleFitView = () => reactFlowInstance && reactFlowInstance.fitView({ duration: 400 });
+  const handleFitView = () => {
+    if (!reactFlowInstance) return;
+    const isMobile = window.innerWidth < 768;
+    reactFlowInstance.fitView({ 
+      padding: isMobile ? 0.3 : 0.1, 
+      includeHiddenNodes: false, 
+      duration: 400 
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -814,7 +831,10 @@ export default function TracksTreeGrid({
             onPaneClick={handlePaneClick}
             onPaneTouchStart={handlePaneClick}
             fitView
-            fitViewOptions={{ padding: 0.05 }}
+            fitViewOptions={{ 
+              padding: window.innerWidth < 768 ? 0.3 : 0.05, 
+              includeHiddenNodes: false 
+            }}
             panOnScroll={false}
             zoomOnScroll={true}
             zoomOnPinch={true}

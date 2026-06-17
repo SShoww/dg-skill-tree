@@ -168,7 +168,10 @@ export default function CourseCard({
         className={`course-card-wrapper transition-all duration-200 cursor-pointer ${opacityClass}`}
         style={{
           transform: borderStyle.scale,
-          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          width: isTimeline ? '200px' : '100%',
+          display: 'flex',
+          justifyContent: 'stretch'
         }}
       >
         <Card
@@ -187,7 +190,7 @@ export default function CourseCard({
             boxShadow: borderStyle.boxShadow,
             height: isTimeline ? '120px' : '82px',
             minHeight: isTimeline ? '120px' : '82px',
-            width: isTimeline ? '200px' : '100%',
+            width: '100%',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
@@ -203,7 +206,7 @@ export default function CourseCard({
           }}
         >
           {/* Card Top: Code, Credits, and Status Checkbox */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '18px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '18px', width: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span className="course-card-code" style={{ fontFamily: 'monospace', fontSize: '9px', fontWeight: 800, color: '#94a3b8' }}>
                 {displayCourse.code}
@@ -246,7 +249,7 @@ export default function CourseCard({
           </div>
 
           {/* Card Middle: Title */}
-          <div style={{ margin: '2px 0', height: isTimeline ? '52px' : 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ margin: '2px 0', height: isTimeline ? '52px' : 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
             <div 
               className="course-card-title-code"
               style={{ fontSize: '11px', fontWeight: 800, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
@@ -291,7 +294,8 @@ export default function CourseCard({
               fontWeight: 600,
               height: '14px',
               borderTop: '1px dashed rgba(0,0,0,0.05)',
-              paddingTop: '2px'
+              paddingTop: '2px',
+              width: '100%'
             }}
           >
             <span className="course-card-footer" style={{ textTransform: 'uppercase', fontSize: '8px', letterSpacing: '0.2px' }}>

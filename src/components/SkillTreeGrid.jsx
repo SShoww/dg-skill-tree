@@ -283,6 +283,7 @@ export default function SkillTreeGrid({
         {/* Responsive Semester View */}
         {windowWidth < 768 ? (
           <Tabs
+            tabBarGutter={8}
             defaultActiveKey="0"
             type="card"
             centered
@@ -417,7 +418,7 @@ export default function SkillTreeGrid({
         ) : (
           <div 
             ref={containerRef}
-            className="relative overflow-x-auto pb-12 scroll-smooth scrollbar-none"
+            className="relative overflow-x-auto pb-12 scroll-smooth timeline-scroll-container"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <div className="relative" style={{ minWidth: '1880px', width: '100%' }}>
