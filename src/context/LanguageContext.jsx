@@ -89,6 +89,8 @@ const resources = {
     confirm_reset_content: "Are you sure you want to clear all completed courses progress and elective assignments?",
     confirm_yes: "Yes",
     confirm_no: "No",
+    theme_light: "Switch to Light Mode",
+    theme_dark: "Switch to Dark Mode",
     
     year: "Year",
     semester: "Semester",
@@ -214,6 +216,8 @@ const resources = {
     confirm_reset_content: "คุณแน่ใจหรือไม่ที่จะล้างความคืบหน้าวิชาที่เรียนผ่านและการจัดวิชาเลือกทั้งหมด?",
     confirm_yes: "ตกลง",
     confirm_no: "ยกเลิก",
+    theme_light: "เปลี่ยนเป็นโหมดสว่าง",
+    theme_dark: "เปลี่ยนเป็นโหมดมืด",
     
     year: "ชั้นปีที่",
     semester: "ภาคการศึกษาที่",

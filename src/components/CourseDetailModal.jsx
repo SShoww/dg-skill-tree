@@ -11,6 +11,7 @@ import {
   ThunderboltOutlined
 } from '@ant-design/icons';
 import { useTranslation } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { getPrepData } from '../data/coursePrepData';
 import { freeElectivesPool } from '../data/courses';
 import SyllabusTab from './SyllabusTab';
@@ -37,6 +38,7 @@ export default function CourseDetailModal({
   onAddMajorElectiveSlotClick
 }) {
   const { language, t } = useTranslation();
+  const { isDarkMode } = useTheme();
   const isTh = language === 'th';
 
   if (!course) return null;
@@ -114,14 +116,14 @@ export default function CourseDetailModal({
       title={
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 800, color: '#94a3b8', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 800, color: isDarkMode ? '#a1a1aa' : '#94a3b8', background: isDarkMode ? '#27272a' : '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>
               {displayCourse.code}
             </span>
             <Tag color={getCategoryColor(course.category)} style={{ margin: 0, fontWeight: 700 }}>
               {getCategoryLabel(course.category)}
             </Tag>
           </div>
-          <Title level={4} style={{ margin: '4px 0 0 0', fontWeight: 800, color: '#1e293b' }}>
+          <Title level={4} style={{ margin: '4px 0 0 0', fontWeight: 800, color: isDarkMode ? '#f4f4f5' : '#1e293b' }}>
             {displayCourse.dept_code} — {isTh ? displayCourse.title_th : displayCourse.title_en}
           </Title>
         </div>
@@ -144,8 +146,8 @@ export default function CourseDetailModal({
             style={{ 
               borderRadius: '8px', 
               fontWeight: 700,
-              backgroundColor: !isCompleted && isUnlocked && (!isGeElectiveSlot && !isMajorElectiveSlot && !isFreeElectiveSlot || selectedSubCode) ? '#4f46e5' : undefined,
-              borderColor: !isCompleted && isUnlocked && (!isGeElectiveSlot && !isMajorElectiveSlot && !isFreeElectiveSlot || selectedSubCode) ? '#4f46e5' : undefined,
+              backgroundColor: !isCompleted && isUnlocked && (!isGeElectiveSlot && !isMajorElectiveSlot && !isFreeElectiveSlot || selectedSubCode) ? '#5b44e4' : undefined,
+              borderColor: !isCompleted && isUnlocked && (!isGeElectiveSlot && !isMajorElectiveSlot && !isFreeElectiveSlot || selectedSubCode) ? '#5b44e4' : undefined,
             }}
           >
             {isCompleted ? t('modal_mark_incomplete') : t('modal_mark_complete')}
@@ -157,8 +159,8 @@ export default function CourseDetailModal({
       <div style={{ marginTop: '16px', maxHeight: '60vh', overflowY: 'auto', paddingRight: '6px' }}>
         {/* Free Elective Dropdown Selector in Modal */}
         {isFreeElectiveSlot && (
-          <div style={{ background: '#fffbeb', padding: '16px', borderRadius: '12px', border: '1px solid #fef3c7', marginBottom: '20px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: '#d97706', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+          <div style={{ background: isDarkMode ? '#381602' : '#fffbeb', padding: '16px', borderRadius: '12px', border: isDarkMode ? '1px solid #78350f' : '1px solid #fef3c7', marginBottom: '20px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: isDarkMode ? '#f59e0b' : '#d97706', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
               {isTh ? 'เลือกวิชาเลือกเสรี' : 'Select Free Elective Course'}
             </span>
             {(() => {
@@ -196,7 +198,7 @@ export default function CourseDetailModal({
                           href="https://cmu-review.vercel.app/" 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}
+                          style={{ fontSize: '12px', color: isDarkMode ? '#f59e0b' : '#d97706', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <CompassOutlined /> {isTh ? 'ดูรีวิววิชาที่ cmu-review.vercel.app' : 'See course reviews at cmu-review.vercel.app'}
@@ -209,17 +211,17 @@ export default function CourseDetailModal({
             })()}
             
             {/* Banner recommendation link */}
-            <div style={{ background: '#fffbeb', border: '1px dashed #fbbf24', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ background: isDarkMode ? '#27190c' : '#fffbeb', border: isDarkMode ? '1px dashed #f59e0b' : '1px dashed #fbbf24', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ fontSize: '20px' }}>💡</div>
               <div style={{ flex: 1 }}>
-                <Text style={{ fontSize: '12.5px', color: '#b45309', fontWeight: 600, display: 'block' }}>
+                <Text style={{ fontSize: '12.5px', color: isDarkMode ? '#f59e0b' : '#b45309', fontWeight: 600, display: 'block' }}>
                   {isTh ? 'ไม่แน่ใจว่าจะลงวิชาไหนดีใช่ไหม?' : 'Not sure which course to pick?'}
                 </Text>
                 <a 
                   href="https://cmu-review.vercel.app/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}
+                  style={{ fontSize: '12px', color: isDarkMode ? '#fbbf24' : '#d97706', fontWeight: 700, textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}
                 >
                   {isTh ? 'ไปค้นหารีวิววิชาและอ่านประสบการณ์จากรุ่นพี่ได้ที่ cmu-review.vercel.app ↗' : 'Find course reviews and senior feedback on cmu-review.vercel.app ↗'}
                 </a>
@@ -230,8 +232,8 @@ export default function CourseDetailModal({
 
         {/* GE Elective Dropdown Selector in Modal */}
         {isGeElectiveSlot && (
-          <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+          <div style={{ background: isDarkMode ? '#1f1f23' : '#f8fafc', padding: '16px', borderRadius: '12px', border: isDarkMode ? '1px solid #27272a' : '1px solid #e2e8f0', marginBottom: '20px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: isDarkMode ? '#a1a1aa' : '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
               {t('modal_select_ge')}
             </span>
             <Select
@@ -268,17 +270,17 @@ export default function CourseDetailModal({
 
         {/* Major Elective Slot Assignment in Modal */}
         {isMajorElectiveSlot && (
-          <div style={{ background: '#f0fdfa', padding: '16px', borderRadius: '12px', border: '1px solid #ccfbf1', marginBottom: '20px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+          <div style={{ background: isDarkMode ? '#05291b' : '#f0fdfa', padding: '16px', borderRadius: '12px', border: isDarkMode ? '1px solid #064e3b' : '1px solid #ccfbf1', marginBottom: '20px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: isDarkMode ? '#14b8a6' : '#0d9488', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
               {t('major_elec_status')}
             </span>
             {selectedMajorSubCode ? (
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
                 <div>
-                  <Text strong style={{ color: '#0f766e', fontSize: '13px' }}>
+                  <Text strong style={{ color: isDarkMode ? '#2dd4bf' : '#0f766e', fontSize: '13px' }}>
                     {t('assigned')} {displayCourse.code} - {isTh ? displayCourse.title_th : displayCourse.title_en}
                   </Text>
-                  <Text style={{ display: 'block', fontSize: '11px', color: '#0d9488', marginTop: '2px' }}>
+                  <Text style={{ display: 'block', fontSize: '11px', color: isDarkMode ? '#14b8a6' : '#0d9488', marginTop: '2px' }}>
                     {t('card_credits')} {displayCourse.credits} ({displayCourse.dept_code})
                   </Text>
                 </div>
@@ -291,7 +293,7 @@ export default function CourseDetailModal({
                       onClose();
                       onAddMajorElectiveSlotClick && onAddMajorElectiveSlotClick(course.code);
                     }}
-                    style={{ borderRadius: '6px', fontSize: '11px', fontWeight: 700, borderColor: '#0d9488', color: '#0d9488' }}
+                    style={{ borderRadius: '6px', fontSize: '11px', fontWeight: 700, borderColor: isDarkMode ? '#14b8a6' : '#0d9488', color: isDarkMode ? '#2dd4bf' : '#0d9488' }}
                   >
                     {t('change_course')}
                   </Button>
@@ -310,7 +312,7 @@ export default function CourseDetailModal({
               </div>
             ) : (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                <Text style={{ fontSize: '12px', color: '#0d9488', fontWeight: 600 }}>
+                <Text style={{ fontSize: '12px', color: isDarkMode ? '#14b8a6' : '#0d9488', fontWeight: 600 }}>
                   {t('no_major_assigned')}
                 </Text>
                 <Button 
@@ -390,10 +392,10 @@ export default function CourseDetailModal({
                     
                     return (
                       <div>
-                        <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0', fontSize: '14px', color: '#1e293b' }}>
+                        <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0', fontSize: '14px', color: isDarkMode ? '#f4f4f5' : '#1e293b' }}>
                           {t('course_overview')}
                         </Title>
-                        <Paragraph style={{ color: '#475569', fontSize: '13px', lineHeight: '1.6', background: '#f8fafc', padding: '14px 16px', borderRadius: '8px', border: '1px solid #f1f5f9', margin: 0 }}>
+                        <Paragraph style={{ color: isDarkMode ? '#d4d4d8' : '#475569', fontSize: '13px', lineHeight: '1.6', background: isDarkMode ? '#1f1f23' : '#f8fafc', padding: '14px 16px', borderRadius: '8px', border: isDarkMode ? '1px solid #27272a' : '1px solid #f1f5f9', margin: 0 }}>
                           <span style={{ fontStyle: 'italic', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                             {isTh ? displayCourse.title_th : displayCourse.title_en}
                             {displayCourse.title_en !== displayCourse.title_th && (

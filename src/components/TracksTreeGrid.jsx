@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import CourseCard from './CourseCard';
 import { Typography, Space, Button } from 'antd';
 import { useTranslation } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { 
   CompassOutlined, 
   ZoomInOutlined, 
@@ -124,6 +125,7 @@ const ELECTIVE_SEMESTER_MAP = {
 // Custom Course Node Wrapper that hosts CourseCard and Left/Right handles
 const CourseNode = ({ data }) => {
   const { language, t } = useTranslation();
+  const { isDarkMode } = useTheme();
   const isTh = language === 'th';
 
   if (data.isSlotPlaceholder) {
@@ -132,13 +134,13 @@ const CourseNode = ({ data }) => {
       <div style={{ position: 'relative', width: 230 }} className={opacityClass}>
         <div 
           onClick={data.onAddMajorElectiveSlotClick}
-          className="border border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 rounded-xl p-2 flex flex-col justify-center items-center cursor-pointer transition-all duration-200 w-full"
-          style={{ height: '82px', userSelect: 'none', backgroundColor: '#fefefe' }}
+          className="border border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 dark:border-zinc-700 dark:hover:border-indigo-500 dark:hover:bg-zinc-800/50 rounded-xl p-2 flex flex-col justify-center items-center cursor-pointer transition-all duration-200 w-full"
+          style={{ height: '82px', userSelect: 'none', backgroundColor: isDarkMode ? '#1c1c1e' : '#fefefe' }}
         >
-          <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px' }}>
+          <span style={{ fontSize: '11px', color: '#5b44e4', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px' }}>
             <PlusOutlined style={{ fontSize: '11px' }} /> {isTh ? 'วิชาเอกเลือก' : 'Major Elective'}
           </span>
-          <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <span style={{ fontSize: '9px', color: isDarkMode ? '#71717a' : '#94a3b8', fontWeight: 600, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             {isTh ? 'คลิกเพื่อเลือกวิชา' : 'Add Slot'}
           </span>
         </div>
@@ -192,15 +194,16 @@ const CourseNode = ({ data }) => {
 
 // Custom visual background Swimlane node that draws vertical dashed borders for semesters
 const SwimlaneNode = ({ data }) => {
+  const { isDarkMode } = useTheme();
   const columnWidth = data.columnWidth || 320;
   return (
     <div 
       style={{
         width: '100%',
         height: '100%',
-        backgroundColor: data.bgColor || 'rgba(0,0,0,0.01)',
-        borderTop: `1px solid ${data.borderColor || '#f1f5f9'}`,
-        borderBottom: `1px solid ${data.borderColor || '#f1f5f9'}`,
+        backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.15)' : (data.bgColor || 'rgba(0,0,0,0.01)'),
+        borderTop: isDarkMode ? '1px solid #27272a' : `1px solid ${data.borderColor || '#f1f5f9'}`,
+        borderBottom: isDarkMode ? '1px solid #27272a' : `1px solid ${data.borderColor || '#f1f5f9'}`,
         position: 'relative',
         pointerEvents: 'none',
         borderRadius: '12px'
@@ -216,7 +219,7 @@ const SwimlaneNode = ({ data }) => {
             top: 0,
             bottom: 0,
             width: columnWidth,
-            borderRight: i < 7 ? '1px dashed rgba(226, 232, 240, 0.5)' : 'none',
+            borderRight: i < 7 ? (isDarkMode ? '1px dashed rgba(63, 63, 70, 0.4)' : '1px dashed rgba(226, 232, 240, 0.5)') : 'none',
             pointerEvents: 'none'
           }}
         />
@@ -228,23 +231,24 @@ const SwimlaneNode = ({ data }) => {
 // Custom Semester column header node
 const SemesterHeaderNode = ({ data }) => {
   const { t } = useTranslation();
+  const { isDarkMode } = useTheme();
   return (
     <div 
       style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e2e8f0',
+        backgroundColor: isDarkMode ? '#18181b' : '#ffffff',
+        border: isDarkMode ? '1px solid #27272a' : '1px solid #e2e8f0',
         borderRadius: '10px',
         padding: '6px 12px',
         textAlign: 'center',
         width: '100%',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+        boxShadow: isDarkMode ? 'none' : '0 2px 4px rgba(0,0,0,0.02)',
         userSelect: 'none'
       }}
     >
-      <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+      <div style={{ fontSize: '9px', fontWeight: 900, color: isDarkMode ? '#71717a' : '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
         {t('year')} {data.year}
       </div>
-      <div style={{ fontSize: '12px', fontWeight: 900, color: '#334155', marginTop: '1px' }}>
+      <div style={{ fontSize: '12px', fontWeight: 900, color: isDarkMode ? '#f4f4f5' : '#334155', marginTop: '1px' }}>
         {t('semester')} {data.semester}
       </div>
     </div>
@@ -254,6 +258,7 @@ const SemesterHeaderNode = ({ data }) => {
 // Custom Track Label node on the left sidebar
 const TrackLabelNode = ({ data }) => {
   const { t } = useTranslation();
+  const { isDarkMode } = useTheme();
   
   const getTrackTranslationKey = (key) => {
     switch(key) {
@@ -321,6 +326,7 @@ export default function TracksTreeGrid({
   setHighlightedCourseCode
 }) {
   const { language, t } = useTranslation();
+  const { isDarkMode } = useTheme();
   const isTh = language === 'th';
   const reactFlowRef = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
@@ -781,18 +787,18 @@ export default function TracksTreeGrid({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+      <div className={`rounded-2xl border p-6 ${isDarkMode ? 'bg-zinc-900 border-zinc-800 shadow-none' : 'bg-white border-slate-100 shadow-sm'}`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 select-none">
           <div>
-            <Title level={4} style={{ margin: 0, fontWeight: 800, color: '#1e293b' }} className="flex items-center gap-2">
-              <CompassOutlined style={{ color: '#4f46e5' }} />
+            <Title level={4} style={{ margin: 0, fontWeight: 800, color: isDarkMode ? '#f4f4f5' : '#1e293b' }} className="flex items-center gap-2">
+              <CompassOutlined style={{ color: isDarkMode ? '#818cf8' : '#5b44e4' }} />
               Specialization Tracks Flowchart
             </Title>
-            <Paragraph style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>
+            <Paragraph style={{ margin: '4px 0 0 0', fontSize: '13px', color: isDarkMode ? '#a1a1aa' : '#64748b' }}>
               Dynamic interactive curriculum canvas. Drag to pan, pinch/wheel to zoom, and hover a subject to trace prerequisite pathways.
             </Paragraph>
           </div>
-          <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
+          <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-900 p-3 rounded-xl border border-slate-100 dark:border-zinc-800">
             <div className="flex items-center gap-1.5">
               <span className="w-4 h-1 bg-red-500 rounded inline-block"></span>
               <span>Prerequisites (วิชาบังคับก่อน)</span>
@@ -805,14 +811,14 @@ export default function TracksTreeGrid({
         </div>
 
         {/* Canvas Toolbar Controls */}
-        <div className="flex justify-between items-center gap-2 mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-200/50 select-none">
+        <div className="flex justify-between items-center gap-2 mb-4 bg-slate-50 dark:bg-zinc-900 p-2.5 rounded-xl border border-slate-200/50 dark:border-zinc-800 select-none">
           <Space>
             <Button size="small" icon={<ZoomInOutlined />} onClick={handleZoomIn}>Zoom In</Button>
             <Button size="small" icon={<ZoomOutOutlined />} onClick={handleZoomOut}>Zoom Out</Button>
             <Button size="small" icon={<FullscreenOutlined />} onClick={handleFitView}>Fit View</Button>
           </Space>
           {windowWidth >= 640 && (
-            <div className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+            <div className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 flex items-center gap-1">
               <BlockOutlined /> Miro-style Canvas Active
             </div>
           )}
@@ -827,10 +833,10 @@ export default function TracksTreeGrid({
             boxSizing: 'border-box',
             height: windowWidth < 640 ? '480px' : '620px', 
             position: 'relative', 
-            border: '1px solid #e2e8f0', 
+            border: isDarkMode ? '1px solid #27272a' : '1px solid #e2e8f0', 
             borderRadius: '16px', 
             overflow: 'hidden',
-            background: '#fafbfd' 
+            background: isDarkMode ? '#09090b' : '#fafbfd' 
           }}
         >
           <ReactFlow
@@ -859,21 +865,21 @@ export default function TracksTreeGrid({
             <Controls position="bottom-left" showInteractive={false} />
             <MiniMap 
               position="bottom-right" 
-              style={{ height: 100, width: 140, borderRadius: '8px', border: '1px solid #cbd5e1' }} 
+              style={{ height: 100, width: 140, borderRadius: '8px', border: isDarkMode ? '1px solid #27272a' : '1px solid #cbd5e1' }} 
               nodeColor={(node) => {
                 if (node.type === 'swimlane') return 'rgba(0, 0, 0, 0.01)';
-                if (node.type === 'semesterHeader') return '#f8fafc';
+                if (node.type === 'semesterHeader') return isDarkMode ? '#18181b' : '#f8fafc';
                 if (node.type === 'trackLabel') return '#475569';
                 // color-code course nodes
                 const cat = node.data?.course?.category;
-                if (cat === 'Core') return '#4f46e5';
+                if (cat === 'Core') return '#5b44e4';
                 if (cat === 'Major_Required') return '#3b82f6';
                 if (cat === 'Major_Elective') return '#10b981';
                 return '#94a3b8';
               }} 
-              maskColor="rgba(0, 0, 0, 0.03)" 
+              maskColor={isDarkMode ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.03)'} 
             />
-            <Background color="#94a3b8" gap={20} size={1} opacity={0.3} />
+            <Background color={isDarkMode ? '#52525b' : '#94a3b8'} gap={20} size={1} opacity={isDarkMode ? 0.15 : 0.3} />
           </ReactFlow>
         </div>
       </div>

@@ -2,12 +2,14 @@ import React from 'react';
 import { Typography, Tag, Button, Empty, Card, Divider } from 'antd';
 import { CompassOutlined, FileTextOutlined } from '@ant-design/icons';
 import { useTranslation } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import syllabusData from '../data/syllabusData.json';
 
 const { Paragraph, Text, Title } = Typography;
 
 export default function SyllabusTab({ courseCode }) {
   const { language, t } = useTranslation();
+  const { isDarkMode } = useTheme();
   const isTh = language === 'th';
 
   const syllabus = syllabusData[courseCode];
@@ -38,8 +40,8 @@ export default function SyllabusTab({ courseCode }) {
           }
         >
           <div style={{ marginTop: '16px', maxWidth: '420px', margin: '16px auto 0 auto' }}>
-            <Card size="small" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-              <Paragraph style={{ fontSize: '12px', color: '#475569', marginBottom: '12px', textAlign: 'left', lineHeight: 1.5 }}>
+            <Card size="small" style={{ background: isDarkMode ? '#1f1f23' : '#f8fafc', border: isDarkMode ? '1px solid #27272a' : '1px solid #e2e8f0', borderRadius: '8px' }}>
+              <Paragraph style={{ fontSize: '12px', color: isDarkMode ? '#a1a1aa' : '#475569', marginBottom: '12px', textAlign: 'left', lineHeight: 1.5 }}>
                 {isTh 
                   ? `คุณสามารถค้นหารายละเอียดคำอธิบายรายวิชา วัตถุประสงค์ (CLOs) และการประเมินผลแบบล่าสุดได้โดยตรงที่ระบบสำนักทะเบียน CMU MIS โดยใช้รหัสวิชา: ` 
                   : `You can search for the official up-to-date course description, learning outcomes (CLOs), and grading breakdown directly on the CMU MIS Portal using Course No: `}
@@ -55,8 +57,8 @@ export default function SyllabusTab({ courseCode }) {
                   borderRadius: '6px', 
                   fontSize: '12px', 
                   fontWeight: 700, 
-                  backgroundColor: '#4f46e5',
-                  borderColor: '#4f46e5'
+                  backgroundColor: '#5b44e4',
+                  borderColor: '#5b44e4'
                 }}
               >
                 {isTh ? 'ไปที่ระบบ CMU MIS TQF' : 'Go to CMU MIS TQF'}
@@ -75,10 +77,10 @@ export default function SyllabusTab({ courseCode }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '12px 0 24px 0' }}>
       
       {/* Header Badge */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f1f5f9', padding: '10px 14px', borderRadius: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: isDarkMode ? '#27272a' : '#f1f5f9', padding: '10px 14px', borderRadius: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <FileTextOutlined style={{ color: '#4f46e5', fontSize: '16px' }} />
-          <Text strong style={{ fontSize: '13px', color: '#334155' }}>
+          <FileTextOutlined style={{ color: isDarkMode ? '#818cf8' : '#5b44e4', fontSize: '16px' }} />
+          <Text strong style={{ fontSize: '13px', color: isDarkMode ? '#e4e4e7' : '#334155' }}>
             {isTh ? 'เวอร์ชันประมวลรายวิชาที่เผยแพร่' : 'Published Syllabus Version'}
           </Text>
         </div>
@@ -91,25 +93,25 @@ export default function SyllabusTab({ courseCode }) {
 
       {/* Description */}
       <div>
-        <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0', color: '#1e293b', fontSize: '14px' }}>
+        <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0', color: isDarkMode ? '#f4f4f5' : '#1e293b', fontSize: '14px' }}>
           {isTh ? '📖 คำอธิบายลักษณะกระบวนวิชา (Course Description)' : '📖 Course Description'}
         </Title>
-        <Paragraph style={{ color: '#475569', fontSize: '13px', lineHeight: '1.6', background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #f1f5f9', margin: 0 }}>
+        <Paragraph style={{ color: isDarkMode ? '#d4d4d8' : '#475569', fontSize: '13px', lineHeight: '1.6', background: isDarkMode ? '#1f1f23' : '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: isDarkMode ? '1px solid #27272a' : '1px solid #f1f5f9', margin: 0 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {descTh && (
               <div>
-                <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                <span style={{ fontWeight: 800, fontSize: '10px', color: isDarkMode ? '#818cf8' : '#5b44e4', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
                   {isTh ? 'ภาษาไทย (TH)' : 'Thai Description (TH)'}
                 </span>
-                <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descTh}</span>
+                <span style={{ color: isDarkMode ? '#e4e4e7' : '#334155', display: 'block', textIndent: '20px' }}>{descTh}</span>
               </div>
             )}
             {descEn && (
               <div>
-                <span style={{ fontWeight: 800, fontSize: '10px', color: '#4f46e5', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
+                <span style={{ fontWeight: 800, fontSize: '10px', color: isDarkMode ? '#818cf8' : '#5b44e4', textTransform: 'uppercase', display: 'block', marginBottom: '2px', letterSpacing: '0.5px' }}>
                   {isTh ? 'ภาษาอังกฤษ (EN)' : 'English Description (EN)'}
                 </span>
-                <span style={{ color: '#334155', display: 'block', textIndent: '20px' }}>{descEn}</span>
+                <span style={{ color: isDarkMode ? '#e4e4e7' : '#334155', display: 'block', textIndent: '20px' }}>{descEn}</span>
               </div>
             )}
           </div>
@@ -119,7 +121,7 @@ export default function SyllabusTab({ courseCode }) {
       {/* Course Learning Outcomes (CLOs) if available */}
       {hasClos && (
         <div>
-          <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0', color: '#1e293b', fontSize: '14px' }}>
+          <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0', color: isDarkMode ? '#f4f4f5' : '#1e293b', fontSize: '14px' }}>
             {isTh ? '📋 ผลการเรียนรู้ที่คาดหวัง (Course Learning Outcomes - CLOs)' : '📋 Course Learning Outcomes (CLOs)'}
           </Title>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -129,15 +131,15 @@ export default function SyllabusTab({ courseCode }) {
                 style={{ 
                   display: 'flex', 
                   gap: '10px', 
-                  background: '#f8fafc', 
+                  background: isDarkMode ? '#1f1f23' : '#f8fafc', 
                   padding: '10px 14px', 
                   borderRadius: '6px', 
-                  borderLeft: '3px solid #4f46e5',
+                  borderLeft: `3px solid ${isDarkMode ? '#818cf8' : '#5b44e4'}`,
                   fontSize: '12.5px',
-                  color: '#475569'
+                  color: isDarkMode ? '#d4d4d8' : '#475569'
                 }}
               >
-                <span style={{ fontWeight: 700, color: '#4f46e5' }}>CLO {idx + 1}</span>
+                <span style={{ fontWeight: 700, color: isDarkMode ? '#818cf8' : '#5b44e4' }}>CLO {idx + 1}</span>
                 <span>{clo}</span>
               </div>
             ))}
@@ -148,26 +150,26 @@ export default function SyllabusTab({ courseCode }) {
       {/* Assessment/Grading breakdown if available */}
       {hasAssessment && (
         <div>
-          <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0', color: '#1e293b', fontSize: '14px' }}>
+          <Title level={5} style={{ fontWeight: 800, margin: '0 0 8px 0', color: isDarkMode ? '#f4f4f5' : '#1e293b', fontSize: '14px' }}>
             {isTh ? '📊 สัดส่วนการประเมินผลเรียน' : '📊 Assessment & Grading Criteria'}
           </Title>
-          <div style={{ border: '1px solid #f1f5f9', borderRadius: '8px', overflow: 'hidden' }}>
+          <div style={{ border: isDarkMode ? '1px solid #27272a' : '1px solid #f1f5f9', borderRadius: '8px', overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
               <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-                  <th style={{ padding: '10px 14px', color: '#475569', fontWeight: 700 }}>
+                <tr style={{ background: isDarkMode ? '#27272a' : '#f8fafc', borderBottom: isDarkMode ? '1px solid #3f3f46' : '1px solid #f1f5f9' }}>
+                  <th style={{ padding: '10px 14px', color: isDarkMode ? '#a1a1aa' : '#475569', fontWeight: 700 }}>
                     {isTh ? 'วิธีการประเมิน' : 'Evaluation Method'}
                   </th>
-                  <th style={{ padding: '10px 14px', color: '#475569', fontWeight: 700, width: '100px', textAlign: 'right' }}>
+                  <th style={{ padding: '10px 14px', color: isDarkMode ? '#a1a1aa' : '#475569', fontWeight: 700, width: '100px', textAlign: 'right' }}>
                     {isTh ? 'สัดส่วน (%)' : 'Weight (%)'}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {syllabus.assessment.map((item, idx) => (
-                  <tr key={idx} style={{ borderBottom: idx === syllabus.assessment.length - 1 ? 'none' : '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '10px 14px', color: '#334155' }}>{item.method}</td>
-                    <td style={{ padding: '10px 14px', color: '#1e293b', fontWeight: 700, textAlign: 'right' }}>{item.weight}</td>
+                  <tr key={idx} style={{ borderBottom: idx === syllabus.assessment.length - 1 ? 'none' : (isDarkMode ? '1px solid #27272a' : '1px solid #f1f5f9') }}>
+                    <td style={{ padding: '10px 14px', color: isDarkMode ? '#d4d4d8' : '#334155' }}>{item.method}</td>
+                    <td style={{ padding: '10px 14px', color: isDarkMode ? '#f4f4f5' : '#1e293b', fontWeight: 700, textAlign: 'right' }}>{item.weight}</td>
                   </tr>
                 ))}
               </tbody>
@@ -185,7 +187,7 @@ export default function SyllabusTab({ courseCode }) {
           href="https://www.mis.cmu.ac.th/TQF/coursepublic.aspx"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ fontSize: '12px', fontWeight: 700, color: '#4f46e5' }}
+          style={{ fontSize: '12px', fontWeight: 700, color: isDarkMode ? '#818cf8' : '#5b44e4' }}
         >
           {isTh 
             ? 'ข้อมูลทางการบนหน้าเว็บบริการหลักสูตร CMU MIS TQF ↗' 

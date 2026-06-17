@@ -8,11 +8,13 @@ import {
   ReadOutlined 
 } from '@ant-design/icons';
 import { useTranslation } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 
 const { Title, Text } = Typography;
 
 export default function CreditTracker({ completedCredits }) {
   const { language, t } = useTranslation();
+  const { isDarkMode } = useTheme();
   const isTh = language === 'th';
 
   const graduationRequirements = {
@@ -24,13 +26,14 @@ export default function CreditTracker({ completedCredits }) {
   };
 
   const getCategoryTheme = (key) => {
+    const opacityVal = isDarkMode ? 0.18 : 0.04;
     switch (key) {
-      case 'GE': return { color: '#8b5cf6', strokeColor: '#a78bfa', bgColor: 'rgba(139, 92, 246, 0.04)', icon: <BookOutlined style={{ color: '#8b5cf6' }} /> };
-      case 'Core': return { color: '#6366f1', strokeColor: '#818cf8', bgColor: 'rgba(99, 102, 241, 0.04)', icon: <CompassOutlined style={{ color: '#6366f1' }} /> };
-      case 'Major_Required': return { color: '#3b82f6', strokeColor: '#60a5fa', bgColor: 'rgba(59, 130, 246, 0.04)', icon: <AppstoreOutlined style={{ color: '#3b82f6' }} /> };
-      case 'Major_Elective': return { color: '#10b981', strokeColor: '#34d399', bgColor: 'rgba(16, 185, 129, 0.04)', icon: <TrophyOutlined style={{ color: '#10b981' }} /> };
-      case 'Free_Elective': return { color: '#f59e0b', strokeColor: '#fbbf24', bgColor: 'rgba(245, 158, 11, 0.04)', icon: <InteractionOutlined style={{ color: '#f59e0b' }} /> };
-      default: return { color: '#6366f1', strokeColor: '#818cf8', bgColor: 'rgba(99, 102, 241, 0.04)', icon: <CompassOutlined style={{ color: '#6366f1' }} /> };
+      case 'GE': return { color: '#8b5cf6', strokeColor: '#a78bfa', bgColor: `rgba(139, 92, 246, ${opacityVal})`, icon: <BookOutlined style={{ color: '#8b5cf6' }} /> };
+      case 'Core': return { color: '#5b44e4', strokeColor: '#818cf8', bgColor: `rgba(91, 68, 228, ${opacityVal})`, icon: <CompassOutlined style={{ color: '#5b44e4' }} /> };
+      case 'Major_Required': return { color: '#3b82f6', strokeColor: '#60a5fa', bgColor: `rgba(59, 130, 246, ${opacityVal})`, icon: <AppstoreOutlined style={{ color: '#3b82f6' }} /> };
+      case 'Major_Elective': return { color: '#10b981', strokeColor: '#34d399', bgColor: `rgba(16, 185, 129, ${opacityVal})`, icon: <TrophyOutlined style={{ color: '#10b981' }} /> };
+      case 'Free_Elective': return { color: '#f59e0b', strokeColor: '#fbbf24', bgColor: `rgba(245, 158, 11, ${opacityVal})`, icon: <InteractionOutlined style={{ color: '#f59e0b' }} /> };
+      default: return { color: '#5b44e4', strokeColor: '#818cf8', bgColor: `rgba(91, 68, 228, ${opacityVal})`, icon: <CompassOutlined style={{ color: '#5b44e4' }} /> };
     }
   };
 
@@ -51,32 +54,34 @@ export default function CreditTracker({ completedCredits }) {
 
   return (
     <Card 
-      className="shadow-sm border-slate-100"
+      className={`shadow-sm ${isDarkMode ? 'border-zinc-800' : 'border-slate-100'}`}
       style={{ 
         borderRadius: '16px',
-        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        background: isDarkMode 
+          ? 'linear-gradient(135deg, #18181b 0%, #09090b 100%)' 
+          : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
         overflow: 'hidden'
       }}
       bodyStyle={{ padding: '24px' }}
     >
       {/* Top Section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+      <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b ${isDarkMode ? 'border-zinc-800' : 'border-slate-100'}`}>
         <div>
-          <Title level={4} style={{ margin: 0, fontWeight: 800, color: '#1e293b' }} className="flex items-center gap-2">
-            <ReadOutlined style={{ color: '#4f46e5', fontSize: '24px' }} />
+          <Title level={4} style={{ margin: 0, fontWeight: 800, color: isDarkMode ? '#f4f4f5' : '#1e293b' }} className="flex items-center gap-2">
+            <ReadOutlined style={{ color: isDarkMode ? '#818cf8' : '#5b44e4', fontSize: '24px' }} />
             {isTh ? 'เครื่องมือตรวจสอบหน่วยกิต CMU CAMT' : 'CMU CAMT Graduation Credit Tracker'}
           </Title>
-          <Text type="secondary" style={{ fontSize: '13px' }}>
+          <Text style={{ fontSize: '13px', color: isDarkMode ? '#a1a1aa' : '#64748b' }}>
             {isTh ? 'แผนผังแสดงหน่วยกิตสะสมรายวิชาสำหรับสาขาวิชาดิจิทัลเกมส์ (ทั้งหมด 132 หน่วยกิต)' : 'Visualizing curriculum requirements for Digital Games program (132 Credits total)'}
           </Text>
         </div>
         
-        <div style={{ background: '#ffffff', padding: '10px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }} className="w-full sm:w-auto justify-between sm:justify-start">
+        <div style={{ background: isDarkMode ? '#18181b' : '#ffffff', padding: '10px 20px', borderRadius: '12px', border: isDarkMode ? '1px solid #27272a' : '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }} className="w-full sm:w-auto justify-between sm:justify-start">
           <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block' }}>{isTh ? 'ความคืบหน้ารวม' : 'Total Progress'}</span>
-            <span style={{ fontSize: '22px', fontWeight: 900, color: '#0f172a' }}>{totalCompleted}</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: isDarkMode ? '#a1a1aa' : '#64748b', textTransform: 'uppercase', display: 'block' }}>{isTh ? 'ความคืบหน้ารวม' : 'Total Progress'}</span>
+            <span style={{ fontSize: '22px', fontWeight: 900, color: isDarkMode ? '#f4f4f5' : '#0f172a' }}>{totalCompleted}</span>
             <span style={{ color: '#94a3b8', margin: '0 4px', fontSize: '14px' }}>/</span>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#64748b' }}>{totalRequired} {isTh ? 'หน่วยกิต' : 'Credits'}</span>
+            <span style={{ fontSize: '13px', fontWeight: 700, color: isDarkMode ? '#a1a1aa' : '#64748b' }}>{totalRequired} {isTh ? 'หน่วยกิต' : 'Credits'}</span>
           </div>
           <Progress 
             type="circle" 
@@ -85,7 +90,7 @@ export default function CreditTracker({ completedCredits }) {
             strokeWidth={10}
             strokeColor={{
               '0%': '#10b981',
-              '100%': '#4f46e5',
+              '100%': '#5b44e4',
             }}
           />
         </div>
@@ -114,7 +119,9 @@ export default function CreditTracker({ completedCredits }) {
               <div 
                 style={{ 
                   background: theme.bgColor, 
-                  border: `1px solid ${isCompleted ? '#d1fae5' : '#f1f5f9'}`,
+                  border: isDarkMode 
+                    ? `1px solid ${isCompleted ? '#064e3b' : '#27272a'}` 
+                    : `1px solid ${isCompleted ? '#d1fae5' : '#f1f5f9'}`,
                   borderRadius: '12px',
                   padding: '16px',
                   height: '100%',
@@ -128,23 +135,23 @@ export default function CreditTracker({ completedCredits }) {
               >
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <div style={{ background: '#ffffff', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.03)', border: '1px solid #e2e8f0' }}>
+                    <div style={{ background: isDarkMode ? '#27272a' : '#ffffff', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.03)', border: isDarkMode ? '1px solid #3f3f46' : '1px solid #e2e8f0' }}>
                       {theme.icon}
                     </div>
                     {isCompleted ? (
                       <Tag color="success" style={{ border: 'none', borderRadius: '20px', fontWeight: 700, fontSize: '10px' }}>{isTh ? 'ครบแล้ว' : 'Met'}</Tag>
                     ) : (
-                      <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8' }}>{percent}%</span>
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: isDarkMode ? '#a1a1aa' : '#94a3b8' }}>{percent}%</span>
                     )}
                   </div>
                   
-                  <div style={{ fontSize: '11px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: isDarkMode ? '#a1a1aa' : '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     {key.replace('_', ' ')}
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={`${labels.en} (${labels.th})`}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: isDarkMode ? '#f4f4f5' : '#1e293b', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={`${labels.en} (${labels.th})`}>
                     {isTh ? labels.th : labels.en}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 500 }}>
+                  <div style={{ fontSize: '11px', color: isDarkMode ? '#71717a' : '#64748b', fontWeight: 500 }}>
                     {isTh ? labels.en : labels.th}
                   </div>
                 </div>
@@ -152,13 +159,13 @@ export default function CreditTracker({ completedCredits }) {
                 <div style={{ marginTop: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '6px' }}>
                     <span style={{ fontSize: '20px', fontWeight: 900, color: completed > 0 ? theme.color : '#94a3b8' }}>{completed}</span>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>/ {required} {isTh ? 'นก.' : 'Cr'}</span>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: isDarkMode ? '#a1a1aa' : '#64748b' }}>/ {required} {isTh ? 'นก.' : 'Cr'}</span>
                   </div>
                   <Progress 
                     percent={percent} 
                     showInfo={false} 
                     strokeColor={theme.strokeColor} 
-                    trailColor="#e2e8f0"
+                    trailColor={isDarkMode ? '#27272a' : '#e2e8f0'}
                     strokeWidth={6}
                     style={{ margin: 0 }}
                   />
@@ -170,17 +177,17 @@ export default function CreditTracker({ completedCredits }) {
       </Row>
 
       {/* overall bar */}
-      <div style={{ marginTop: '24px', background: '#f8fafc', padding: '12px 16px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+      <div style={{ marginTop: '24px', background: isDarkMode ? '#1f1f23' : '#f8fafc', padding: '12px 16px', borderRadius: '12px', border: isDarkMode ? '1px solid #27272a' : '1px solid #f1f5f9' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, color: '#475569', textTransform: 'uppercase' }}>{isTh ? 'ความสำเร็จหลักสูตรทั้งหมด' : 'Overall Curriculum Completion'}</span>
-          <span style={{ fontSize: '13px', fontWeight: 900, color: '#4f46e5' }}>{overallPercent}% {isTh ? 'สำเร็จแล้ว' : 'Completed'}</span>
+          <span style={{ fontSize: '12px', fontWeight: 800, color: isDarkMode ? '#a1a1aa' : '#475569', textTransform: 'uppercase' }}>{isTh ? 'ความสำเร็จหลักสูตรทั้งหมด' : 'Overall Curriculum Completion'}</span>
+          <span style={{ fontSize: '13px', fontWeight: 900, color: isDarkMode ? '#818cf8' : '#5b44e4' }}>{overallPercent}% {isTh ? 'สำเร็จแล้ว' : 'Completed'}</span>
         </div>
         <Progress 
           percent={overallPercent} 
           strokeColor={{
             '0%': '#3b82f6',
             '50%': '#10b981',
-            '100%': '#4f46e5',
+            '100%': '#5b44e4',
           }} 
           showInfo={false}
           strokeWidth={10}

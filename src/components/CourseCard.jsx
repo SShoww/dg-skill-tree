@@ -7,6 +7,7 @@ import {
   InfoCircleOutlined
 } from '@ant-design/icons';
 import { useTranslation } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { coursesData, freeElectivesPool } from '../data/courses';
 
 export default function CourseCard({ 
@@ -34,6 +35,7 @@ export default function CourseCard({
   isMobileGrid = false  // 2-column mobile grid mode: auto-height, 2-line title
 }) {
   const { language, t } = useTranslation();
+  const { isDarkMode } = useTheme();
   const isTh = language === 'th';
 
   const isGeElectiveSlot = course.category === 'GE_Elective' && course.code.startsWith('GE-EL-');
@@ -57,29 +59,29 @@ export default function CourseCard({
   // Category Color and Theme configurations
   const getCategoryStyles = (category) => {
     if (isAssignedMajorElective) {
-      return { borderLColor: '#0d9488', bgColor: '#f0fdfa', tagColor: 'teal' };
+      return { borderLColor: '#0d9488', bgColor: isDarkMode ? '#052e2b' : '#f0fdfa', tagColor: 'teal' };
     }
     if (isGeElectiveSlot && selectedGeSubCode) {
-      return { borderLColor: '#a855f7', bgColor: '#faf5ff', tagColor: 'purple' };
+      return { borderLColor: '#a855f7', bgColor: isDarkMode ? '#220b45' : '#faf5ff', tagColor: 'purple' };
     }
     if (isFreeElectiveSlot && selectedFreeSubCode) {
-      return { borderLColor: '#f59e0b', bgColor: '#fffbeb', tagColor: 'warning' };
+      return { borderLColor: '#f59e0b', bgColor: isDarkMode ? '#381602' : '#fffbeb', tagColor: 'warning' };
     }
     switch (category) {
       case 'GE_Required': 
-        return { borderLColor: '#8b5cf6', bgColor: '#faf5ff', tagColor: 'purple' };
+        return { borderLColor: '#8b5cf6', bgColor: isDarkMode ? '#220b45' : '#faf5ff', tagColor: 'purple' };
       case 'GE_Elective': 
-        return { borderLColor: '#a78bfa', bgColor: '#faf9ff', tagColor: 'purple' };
+        return { borderLColor: '#a78bfa', bgColor: isDarkMode ? '#171138' : '#faf9ff', tagColor: 'purple' };
       case 'Core': 
-        return { borderLColor: '#4f46e5', bgColor: '#f5f3ff', tagColor: 'geekblue' };
+        return { borderLColor: '#5b44e4', bgColor: isDarkMode ? '#1a163a' : '#f5f3ff', tagColor: 'geekblue' };
       case 'Major_Required': 
-        return { borderLColor: '#3b82f6', bgColor: '#eff6ff', tagColor: 'blue' };
+        return { borderLColor: '#3b82f6', bgColor: isDarkMode ? '#0d182e' : '#eff6ff', tagColor: 'blue' };
       case 'Major_Elective': 
-        return { borderLColor: '#10b981', bgColor: '#ecfdf5', tagColor: 'emerald' };
+        return { borderLColor: '#10b981', bgColor: isDarkMode ? '#05291b' : '#ecfdf5', tagColor: 'emerald' };
       case 'Free_Elective': 
-        return { borderLColor: '#f59e0b', bgColor: '#fffbeb', tagColor: 'warning' };
+        return { borderLColor: '#f59e0b', bgColor: isDarkMode ? '#381602' : '#fffbeb', tagColor: 'warning' };
       default: 
-        return { borderLColor: '#64748b', bgColor: '#f8fafc', tagColor: 'default' };
+        return { borderLColor: '#64748b', bgColor: isDarkMode ? '#1c1c1e' : '#f8fafc', tagColor: 'default' };
     }
   };
 
@@ -88,7 +90,7 @@ export default function CourseCard({
   // Border styling based on state and highlighting
   const getBorderStyles = () => {
     if (isSelected || highlightType === 'selected') {
-      return { border: '2px solid #4f46e5', boxShadow: '0 0 10px rgba(79, 70, 229, 0.25)', scale: 'scale(1.02)' };
+      return { border: '2px solid #5b44e4', boxShadow: '0 0 10px rgba(91, 68, 228, 0.25)', scale: 'scale(1.02)' };
     }
     if (highlightType === 'prereq') {
       return { border: '2px solid #ef4444', boxShadow: '0 0 10px rgba(239, 68, 68, 0.25)', scale: 'scale(1.02)' };
@@ -100,12 +102,12 @@ export default function CourseCard({
       return { border: '2px solid #f59e0b', boxShadow: '0 2px 6px rgba(245, 158, 11, 0.12)', scale: 'scale(1)' };
     }
     if (isCompleted) {
-      return { border: '1px solid #a7f3d0', boxShadow: 'none', scale: 'scale(1)' };
+      return { border: isDarkMode ? '1px solid #064e3b' : '1px solid #a7f3d0', boxShadow: 'none', scale: 'scale(1)' };
     }
     if (!isUnlocked) {
-      return { border: '1px solid #e2e8f0', boxShadow: 'none', scale: 'scale(1)' };
+      return { border: isDarkMode ? '1px solid #27272a' : '1px solid #e2e8f0', boxShadow: 'none', scale: 'scale(1)' };
     }
-    return { border: '1px solid #cbd5e1', boxShadow: 'none', scale: 'scale(1)' };
+    return { border: isDarkMode ? '1px solid #3f3f46' : '1px solid #cbd5e1', boxShadow: 'none', scale: 'scale(1)' };
   };
 
   const borderStyle = getBorderStyles();
@@ -220,7 +222,7 @@ export default function CourseCard({
           {/* Card Top: Code, Credits, and Status Checkbox */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '18px', width: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span className="course-card-code" style={{ fontFamily: 'monospace', fontSize: '9px', fontWeight: 800, color: '#94a3b8' }}>
+              <span className="course-card-code" style={{ fontFamily: 'monospace', fontSize: '9px', fontWeight: 800, color: isDarkMode ? '#a1a1aa' : '#94a3b8' }}>
                 {displayCourse.code}
               </span>
               {/* Info Icon Button */}
@@ -245,7 +247,7 @@ export default function CourseCard({
                 <Badge status="processing" color="gold" style={{ marginRight: '2px' }} />
               )}
               
-              <span className="course-card-credits" style={{ fontSize: '9px', fontWeight: 700, color: '#64748b', background: 'rgba(0,0,0,0.03)', padding: '1px 4px', borderRadius: '4px' }}>
+              <span className="course-card-credits" style={{ fontSize: '9px', fontWeight: 700, color: isDarkMode ? '#d4d4d8' : '#64748b', background: isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', padding: '1px 4px', borderRadius: '4px' }}>
                 {displayCourse.credits.split('(')[0]} {t('card_cr')}
               </span>
 
@@ -264,13 +266,13 @@ export default function CourseCard({
           <div style={{ margin: '2px 0', height: isTimeline ? '52px' : 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
             <div 
               className="course-card-title-code"
-              style={{ fontSize: isMobileGrid ? '10px' : '11px', fontWeight: 800, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
+              style={{ fontSize: isMobileGrid ? '10px' : '11px', fontWeight: 800, color: isDarkMode ? '#f4f4f5' : '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
             >
               {displayCourse.dept_code}
             </div>
             
             {isGeElectiveSlot && !selectedSubCode ? (
-              <div className="course-card-title-text" style={{ fontSize: '10px', color: '#8b5cf6', fontWeight: 700, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <div className="course-card-title-text" style={{ fontSize: '10px', color: '#a78bfa', fontWeight: 700, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '3px' }}>
                 <SearchOutlined /> {t('card_choose_elective')}
               </div>
             ) : (
@@ -279,7 +281,7 @@ export default function CourseCard({
                 style={{ 
                   fontSize: isMobileGrid ? '9px' : '10px', 
                   fontWeight: 600, 
-                  color: '#475569', 
+                  color: isDarkMode ? '#e4e4e7' : '#475569', 
                   overflow: 'hidden', 
                   textOverflow: 'ellipsis', 
                   display: (isTimeline || isMobileGrid) ? '-webkit-box' : 'block',
@@ -302,10 +304,10 @@ export default function CourseCard({
               justifyContent: 'space-between', 
               alignItems: 'center', 
               fontSize: '8px', 
-              color: '#94a3b8',
+              color: isDarkMode ? '#a1a1aa' : '#94a3b8',
               fontWeight: 600,
               height: '14px',
-              borderTop: '1px dashed rgba(0,0,0,0.05)',
+              borderTop: isDarkMode ? '1px dashed rgba(255,255,255,0.08)' : '1px dashed rgba(0,0,0,0.05)',
               paddingTop: '2px',
               width: '100%'
             }}

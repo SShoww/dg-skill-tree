@@ -3,6 +3,7 @@ import CourseCard from './CourseCard';
 import { Typography, Tabs } from 'antd';
 import { ScheduleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { coursesData } from '../data/courses';
 
 const { Title, Paragraph } = Typography;
@@ -32,6 +33,7 @@ export default function SkillTreeGrid({
   setHighlightedCourseCode
 }) {
   const { language, t } = useTranslation();
+  const { isDarkMode } = useTheme();
   const isTh = language === 'th';
   const containerRef = useRef(null);
   const svgRef = useRef(null);
@@ -322,15 +324,15 @@ export default function SkillTreeGrid({
       <div className="bg-transparent border-0 shadow-none p-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <Title level={4} style={{ margin: 0, fontWeight: 800, color: '#1e293b' }} className="flex items-center gap-2">
-              <ScheduleOutlined style={{ color: '#4f46e5' }} />
+            <Title level={4} style={{ margin: 0, fontWeight: 800, color: isDarkMode ? '#f4f4f5' : '#1e293b' }} className="flex items-center gap-2">
+              <ScheduleOutlined style={{ color: isDarkMode ? '#818cf8' : '#5b44e4' }} />
               Semester Study Plan Timeline
             </Title>
-            <Paragraph style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>
+            <Paragraph style={{ margin: '4px 0 0 0', fontSize: '13px', color: isDarkMode ? '#a1a1aa' : '#64748b' }}>
               Standard curriculum structure mapped semester-by-semester. Click or hover any course to inspect requirements.
             </Paragraph>
           </div>
-          <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
+          <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-900 p-3 rounded-xl border border-slate-100 dark:border-zinc-800">
             <div className="flex items-center gap-1.5">
               <span className="w-4 h-1 bg-red-500 rounded inline-block"></span>
               <span>Prerequisites (วิชาบังคับก่อน)</span>
@@ -380,11 +382,11 @@ export default function SkillTreeGrid({
                 children: (
                   <div className="space-y-4 pt-2">
                     {/* Header in pane */}
-                    <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3 text-center select-none">
-                      <span className="font-extrabold text-[10px] text-slate-400 block uppercase tracking-wider">
+                    <div className="bg-slate-50 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800 rounded-xl p-3 text-center select-none">
+                      <span className="font-extrabold text-[10px] text-slate-400 dark:text-zinc-500 block uppercase tracking-wider">
                         {t('year')} {sem.year}
                       </span>
-                      <span className="font-black text-sm text-slate-700">
+                      <span className="font-black text-sm text-slate-700 dark:text-zinc-300">
                         {t('semester')} {sem.semester}
                       </span>
                     </div>
@@ -424,13 +426,13 @@ export default function SkillTreeGrid({
                             <div 
                               key={course.code} 
                               onClick={() => onAddMajorElectiveSlotClick && onAddMajorElectiveSlotClick(course.code)}
-                              className="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 rounded-xl p-2 flex flex-col justify-center items-center cursor-pointer transition-all duration-200"
-                              style={{ minHeight: '90px', userSelect: 'none' }}
+                              className="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 dark:border-zinc-700 dark:hover:border-indigo-500 dark:hover:bg-zinc-800/50 rounded-xl p-2 flex flex-col justify-center items-center cursor-pointer transition-all duration-200"
+                              style={{ minHeight: '90px', userSelect: 'none', backgroundColor: isDarkMode ? '#1c1c1e' : undefined }}
                             >
-                              <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', textAlign: 'center' }}>
+                              <span style={{ fontSize: '11px', color: '#5b44e4', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', textAlign: 'center' }}>
                                 <PlusOutlined style={{ fontSize: '11px' }} /> {isTh ? 'วิชาเอกเลือก' : 'Major Elective'}
                               </span>
-                              <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>
+                              <span style={{ fontSize: '9px', color: isDarkMode ? '#71717a' : '#94a3b8', fontWeight: 600, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>
                                 {isTh ? 'คลิกเพื่อเลือกวิชา' : 'Click to Add Slot'}
                               </span>
                             </div>
@@ -548,11 +550,11 @@ export default function SkillTreeGrid({
                 return (
                   <div key={idx} className="space-y-4 semester-column-container">
                     {/* Semester Header */}
-                    <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3 text-center shadow-[0_2px_4px_rgba(0,0,0,0.01)] select-none">
-                      <span className="font-extrabold text-[10px] text-slate-400 block uppercase tracking-wider">
+                    <div className="bg-slate-50 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800 rounded-xl p-3 text-center shadow-[0_2px_4px_rgba(0,0,0,0.01)] select-none">
+                      <span className="font-extrabold text-[10px] text-slate-400 dark:text-zinc-500 block uppercase tracking-wider">
                         {t('year')} {sem.year}
                       </span>
-                      <span className="font-black text-sm text-slate-700">
+                      <span className="font-black text-sm text-slate-700 dark:text-zinc-300">
                         {t('semester')} {sem.semester}
                       </span>
                     </div>
@@ -597,13 +599,13 @@ export default function SkillTreeGrid({
                               key={course.code} 
                               id={`course-card-${course.code}`}
                               onClick={() => onAddMajorElectiveSlotClick && onAddMajorElectiveSlotClick(course.code)}
-                              className="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer transition-all duration-200"
-                              style={{ height: '120px', width: '200px', userSelect: 'none' }}
+                              className="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-slate-50/50 dark:border-zinc-700 dark:hover:border-indigo-500 dark:hover:bg-zinc-800/50 rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer transition-all duration-200"
+                              style={{ minHeight: '82px', width: '200px', userSelect: 'none', backgroundColor: isDarkMode ? '#1c1c1e' : '#fefefe' }}
                             >
-                              <span style={{ fontSize: '11px', color: '#4f46e5', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ fontSize: '11px', color: '#5b44e4', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', textAlign: 'center' }}>
                                 <PlusOutlined style={{ fontSize: '11px' }} /> {isTh ? 'วิชาเอกเลือก' : 'Major Elective'}
                               </span>
-                              <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                              <span style={{ fontSize: '9px', color: isDarkMode ? '#71717a' : '#94a3b8', fontWeight: 600, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>
                                 {isTh ? 'คลิกเพื่อเลือกวิชา' : 'Click to Add Slot'}
                               </span>
                             </div>

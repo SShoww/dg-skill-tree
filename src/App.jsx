@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Layout, Radio, Segmented, Input, Button, Card, Progress, Row, Col, Space, Badge, Collapse, Typography, ConfigProvider, Alert, Drawer, FloatButton, Divider, notification, Tooltip, Pagination } from 'antd';
+import { Layout, Radio, Segmented, Input, Button, Card, Progress, Row, Col, Space, Badge, Collapse, Typography, ConfigProvider, Alert, Drawer, FloatButton, Divider, notification, Tooltip, Pagination, theme } from 'antd';
 import { 
   SearchOutlined, 
   FilterOutlined, 
@@ -15,11 +15,14 @@ import {
   CrownOutlined, 
   RocketOutlined,
   PlusOutlined,
-  MenuOutlined
+  MenuOutlined,
+  SunOutlined,
+  MoonOutlined
 } from '@ant-design/icons';
 import enUS from 'antd/locale/en_US';
 import thTH from 'antd/locale/th_TH';
 import { useTranslation } from './context/LanguageContext';
+import { useTheme } from './context/ThemeContext';
 import { coursesData, freeElectivesPool } from './data/courses';
 import { TRACK_ELECTIVES } from './constants/trackElectives';
 import { careerPaths } from './data/careers';
@@ -34,6 +37,7 @@ const { Title, Text, Paragraph } = Typography;
 
 export default function App() {
   const { language, setLanguage, t } = useTranslation();
+  const { isDarkMode, toggleTheme } = useTheme();
   const isTh = language === 'th';
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -449,21 +453,22 @@ export default function App() {
     <ConfigProvider
       locale={language === 'th' ? thTH : enUS}
       theme={{
+        algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
-          colorPrimary: '#4f46e5',
+          colorPrimary: '#5b44e4',
           fontFamily: "'Inter', sans-serif",
           borderRadius: 12,
         },
       }}
     >
-      <Layout className="min-h-screen bg-slate-50" style={{ overflowX: 'hidden' }}>
+      <Layout className="min-h-screen bg-slate-50 dark:bg-zinc-950" style={{ overflowX: 'hidden' }}>
         {/* Banner Header */}
         <Header 
           style={{ 
-            backgroundColor: '#ffffff', 
+            backgroundColor: isDarkMode ? '#18181b' : '#ffffff', 
             height: 'auto', 
             lineHeight: 'normal', 
-            borderBottom: '1px solid #f1f5f9',
+            borderBottom: isDarkMode ? '1px solid #27272a' : '1px solid #f1f5f9',
             position: 'sticky',
             top: 0,
             zIndex: 40,
@@ -474,7 +479,7 @@ export default function App() {
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <div style={{ display: 'flex', alignItems: 'center', gap: windowWidth < 640 ? '8px' : '12px' }}>
               <div style={{ 
-                backgroundColor: '#4f46e5', 
+                backgroundColor: '#5b44e4', 
                 padding: windowWidth < 640 ? '6px' : '10px', 
                 borderRadius: '10px', 
                 display: 'flex', 
@@ -484,10 +489,10 @@ export default function App() {
                 <RocketOutlined style={{ color: '#ffffff', fontSize: windowWidth < 640 ? '16px' : '22px' }} />
               </div>
               <div>
-                <Title level={4} style={{ margin: 0, fontWeight: 900, color: '#1e293b', fontSize: windowWidth < 640 ? '14px' : undefined }} className="text-sm sm:text-base md:text-lg">
+                <Title level={4} style={{ margin: 0, fontWeight: 900, color: isDarkMode ? '#f4f4f5' : '#1e293b', fontSize: windowWidth < 640 ? '14px' : undefined }} className="text-sm sm:text-base md:text-lg">
                   {t('app_title')}
                 </Title>
-                <Text style={{ fontSize: '10px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px', display: windowWidth < 640 ? 'none' : 'block' }}>
+                <Text style={{ fontSize: '10px', fontWeight: 800, color: isDarkMode ? '#71717a' : '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px', display: windowWidth < 640 ? 'none' : 'block' }}>
                   {t('app_subtitle')}
                 </Text>
               </div>
@@ -496,8 +501,8 @@ export default function App() {
             {/* Desktop actions: hidden on mobile/tablet, visible on lg and up */}
             <div className="hidden lg:flex items-center">
               <Space size="middle">
-                <div style={{ backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', marginRight: '4px' }}>{t('btn_load_year')}</span>
+                <div style={{ backgroundColor: isDarkMode ? '#1f1f23' : '#f1f5f9', padding: '4px 8px', borderRadius: '8px', border: isDarkMode ? '1px solid #27272a' : '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isDarkMode ? '#a1a1aa' : '#64748b', marginRight: '4px' }}>{t('btn_load_year')}</span>
                   <Button size="small" type={completedCourses.length === 0 ? 'primary' : 'default'} onClick={() => setCompletedCourses([])} style={{ fontSize: '11px', borderRadius: '6px' }}>{t('btn_y1_start')}</Button>
                   <Button size="small" onClick={() => loadPreset('sophomore')} style={{ fontSize: '11px', borderRadius: '6px' }}>{t('btn_y2_start')}</Button>
                   <Button size="small" onClick={() => loadPreset('junior')} style={{ fontSize: '11px', borderRadius: '6px' }}>{t('btn_y3_start')}</Button>
@@ -536,6 +541,24 @@ export default function App() {
                   <Radio.Button value="en" style={{ fontWeight: 700 }}>EN</Radio.Button>
                   <Radio.Button value="th" style={{ fontWeight: 700 }}>TH</Radio.Button>
                 </Radio.Group>
+
+                <Tooltip title={isDarkMode ? t('theme_light') : t('theme_dark')}>
+                  <Button
+                    type="text"
+                    shape="circle"
+                    icon={isDarkMode ? <SunOutlined style={{ color: '#fbbf24' }} /> : <MoonOutlined style={{ color: '#5b44e4' }} />}
+                    onClick={toggleTheme}
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      backgroundColor: isDarkMode ? '#27272a' : '#f1f5f9',
+                      border: isDarkMode ? '1px solid #3f3f46' : '1px solid #e2e8f0',
+                      width: '32px',
+                      height: '32px'
+                    }}
+                  />
+                </Tooltip>
               </Space>
             </div>
 
@@ -627,6 +650,23 @@ export default function App() {
                 <Radio.Button value="th" style={{ flex: 1, textAlign: 'center', fontWeight: 700 }}>ภาษาไทย</Radio.Button>
               </Radio.Group>
             </div>
+
+            <Divider style={{ margin: '8px 0' }} />
+
+            {/* Theme Switcher */}
+            <div>
+              <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                {language === 'th' ? 'ธีม / หน้าตา' : 'Theme'}
+              </div>
+              <Button
+                type="default"
+                icon={isDarkMode ? <SunOutlined style={{ color: '#fbbf24' }} /> : <MoonOutlined style={{ color: '#5b44e4' }} />}
+                onClick={() => { toggleTheme(); setMenuDrawerOpen(false); }}
+                style={{ width: '100%', fontWeight: 700, borderRadius: '8px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              >
+                {isDarkMode ? t('theme_light') : t('theme_dark')}
+              </Button>
+            </div>
           </div>
         </Drawer>
 
@@ -640,7 +680,11 @@ export default function App() {
             {/* Collapsible Prerequisite Guidelines */}
             <Collapse 
               ghost
-              style={{ background: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '16px' }}
+              style={{ 
+                background: isDarkMode ? '#18181b' : '#ffffff', 
+                border: isDarkMode ? '1px solid #27272a' : '1px solid #f1f5f9', 
+                borderRadius: '16px' 
+              }}
               expandIconPosition="right"
               defaultActiveKey={['1']}
             >
@@ -648,21 +692,21 @@ export default function App() {
                 key="1" 
                 header={
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <QuestionCircleOutlined style={{ color: '#4f46e5', fontSize: '18px' }} />
+                    <QuestionCircleOutlined style={{ color: isDarkMode ? '#818cf8' : '#5b44e4', fontSize: '18px' }} />
                     <div>
-                      <span style={{ fontSize: '14px', fontWeight: 800, color: '#1e293b' }}>{t('guideline_title')}</span>
-                      <span style={{ display: 'block', fontSize: '11px', color: '#94a3b8', fontWeight: 500, marginTop: '2px' }}>{t('guideline_subtitle')}</span>
+                      <span style={{ fontSize: '14px', fontWeight: 800, color: isDarkMode ? '#f4f4f5' : '#1e293b' }}>{t('guideline_title')}</span>
+                      <span style={{ display: 'block', fontSize: '11px', color: isDarkMode ? '#a1a1aa' : '#94a3b8', fontWeight: 500, marginTop: '2px' }}>{t('guideline_subtitle')}</span>
                     </div>
                   </div>
                 }
               >
-                <Row gutter={[24, 24]} style={{ padding: '0 12px 12px 12px', fontSize: '12.5px', color: '#475569' }}>
+                <Row gutter={[24, 24]} style={{ padding: '0 12px 12px 12px', fontSize: '12.5px', color: isDarkMode ? '#d4d4d8' : '#475569' }}>
                   <Col xs={24} md={8}>
-                    <Title level={5} style={{ fontWeight: 900, color: '#e11d48', fontSize: '13px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                    <Title level={5} style={{ fontWeight: 900, color: '#ef4444', fontSize: '13px', textTransform: 'uppercase', marginBottom: '8px' }}>
                       <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#ef4444', marginRight: '6px' }}></span>
                       {t('guideline_col1_title')}
                     </Title>
-                    <Paragraph style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                    <Paragraph style={{ fontSize: '12px', lineHeight: '1.6', color: isDarkMode ? '#a1a1aa' : '#475569' }}>
                       {t('guideline_col1_p1')}
                     </Paragraph>
                     <ul style={{ paddingLeft: '16px', listStyleType: 'disc', fontSize: '12px', lineHeight: '1.7', fontWeight: 600 }}>
@@ -671,12 +715,12 @@ export default function App() {
                     </ul>
                   </Col>
 
-                  <Col xs={24} md={8} style={{ borderLeft: '1px solid #f1f5f9' }}>
+                  <Col xs={24} md={8} style={{ borderLeft: isDarkMode ? '1px solid #27272a' : '1px solid #f1f5f9' }}>
                     <Title level={5} style={{ fontWeight: 900, color: '#3b82f6', fontSize: '13px', textTransform: 'uppercase', marginBottom: '8px' }}>
                       <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#3b82f6', marginRight: '6px' }}></span>
                       {t('guideline_col2_title')}
                     </Title>
-                    <Paragraph style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                    <Paragraph style={{ fontSize: '12px', lineHeight: '1.6', color: isDarkMode ? '#a1a1aa' : '#475569' }}>
                       {t('guideline_col2_p1')}
                     </Paragraph>
                     <Alert 
@@ -687,12 +731,12 @@ export default function App() {
                     />
                   </Col>
 
-                  <Col xs={24} md={8} style={{ borderLeft: '1px solid #f1f5f9' }}>
+                  <Col xs={24} md={8} style={{ borderLeft: isDarkMode ? '1px solid #27272a' : '1px solid #f1f5f9' }}>
                     <Title level={5} style={{ fontWeight: 900, color: '#f59e0b', fontSize: '13px', textTransform: 'uppercase', marginBottom: '8px' }}>
                       <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#f59e0b', marginRight: '6px' }}></span>
                       {t('guideline_col3_title')}
                     </Title>
-                    <Paragraph style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                    <Paragraph style={{ fontSize: '12px', lineHeight: '1.6', color: isDarkMode ? '#a1a1aa' : '#475569' }}>
                       {t('guideline_col3_p1')}
                     </Paragraph>
                     <ul style={{ paddingLeft: '16px', listStyleType: 'disc', fontSize: '12px', lineHeight: '1.7', fontWeight: 600 }}>
@@ -707,12 +751,12 @@ export default function App() {
             {/* Career Goals Filter Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 select-none">
-                <TrophyOutlined style={{ color: '#4f46e5', fontSize: '18px' }} />
+                <TrophyOutlined style={{ color: isDarkMode ? '#818cf8' : '#5b44e4', fontSize: '18px' }} />
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 800, color: '#1e293b' }}>
+                  <Title level={5} style={{ margin: 0, fontWeight: 800, color: isDarkMode ? '#f4f4f5' : '#1e293b' }}>
                     {t('career_title')}
                   </Title>
-                  <Text type="secondary" style={{ fontSize: '12px' }}>
+                  <Text type="secondary" style={{ fontSize: '12px', color: isDarkMode ? '#a1a1aa' : undefined }}>
                     {t('career_subtitle')}
                   </Text>
                 </div>
@@ -734,8 +778,8 @@ export default function App() {
                         style={{
                           borderRadius: '16px',
                           borderWidth: isActive ? '2px' : '1px',
-                          borderColor: isActive ? careerColor : '#e2e8f0',
-                          backgroundColor: isActive ? `${careerColor}03` : '#ffffff',
+                          borderColor: isActive ? careerColor : (isDarkMode ? '#27272a' : '#e2e8f0'),
+                          backgroundColor: isActive ? `${careerColor}08` : (isDarkMode ? '#18181b' : '#ffffff'),
                           boxShadow: isActive ? `0 4px 12px ${careerColor}15` : 'none',
                           height: '100%',
                           display: 'flex',
@@ -755,8 +799,8 @@ export default function App() {
                       >
                         <div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                            <div style={{ backgroundColor: isActive ? careerColor : '#f1f5f9', padding: '8px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <span style={{ color: isActive ? '#ffffff' : '#64748b' }}>
+                            <div style={{ backgroundColor: isActive ? careerColor : (isDarkMode ? '#27272a' : '#f1f5f9'), padding: '8px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ color: isActive ? '#ffffff' : (isDarkMode ? '#a1a1aa' : '#64748b') }}>
                                 {getCareerIcon(key)}
                               </span>
                             </div>
@@ -767,23 +811,23 @@ export default function App() {
                             )}
                           </div>
 
-                          <Title level={5} style={{ margin: '0 0 2px 0', fontWeight: 800, color: '#1e293b', fontSize: '14px' }}>
+                          <Title level={5} style={{ margin: '0 0 2px 0', fontWeight: 800, color: isDarkMode ? '#f4f4f5' : '#1e293b', fontSize: '14px' }}>
                             {isTh ? path.title_th : path.title_en}
                           </Title>
-                          <Paragraph style={{ fontSize: '11.5px', color: '#64748b', lineHeight: 1.5, marginBottom: '20px' }}>
+                          <Paragraph style={{ fontSize: '11.5px', color: isDarkMode ? '#a1a1aa' : '#64748b', lineHeight: 1.5, marginBottom: '20px' }}>
                             {isTh ? path.description_th : path.description_en}
                           </Paragraph>
                         </div>
 
                         <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 800, color: '#475569', marginBottom: '6px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 800, color: isDarkMode ? '#d4d4d8' : '#475569', marginBottom: '6px' }}>
                             <span>{t('career_requisites')}</span>
                             <span>{completedCount} / {totalCourses} {t('career_passed')}</span>
                           </div>
                           <Progress 
                             percent={percent} 
                             strokeColor={careerColor} 
-                            trailColor="#e2e8f0"
+                            trailColor={isDarkMode ? '#27272a' : '#e2e8f0'}
                             strokeWidth={6}
                             showInfo={false}
                           />
@@ -798,7 +842,7 @@ export default function App() {
               {careerFocus && (
                 <Card 
                   size="small" 
-                  style={{ borderRadius: '12px', border: '1px dashed #cbd5e1', backgroundColor: '#f8fafc' }}
+                  style={{ borderRadius: '12px', border: isDarkMode ? '1px dashed #3f3f46' : '1px dashed #cbd5e1', backgroundColor: isDarkMode ? '#1f1f23' : '#f8fafc' }}
                   bodyStyle={{ padding: '16px 20px' }}
                 >
                   <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
@@ -806,7 +850,7 @@ export default function App() {
                       <Text strong style={{ color: getCareerColor(careerFocus), fontSize: '13px' }}>
                         🎯 {t('guidance_filter_enabled')}: {isTh ? careerPaths[careerFocus].title_th : careerPaths[careerFocus].title_en}
                       </Text>
-                      <Paragraph style={{ margin: '2px 0 0 0', fontSize: '11.5px', color: '#64748b' }}>
+                      <Paragraph style={{ margin: '2px 0 0 0', fontSize: '11.5px', color: isDarkMode ? '#a1a1aa' : '#64748b' }}>
                         {t('guidance_filter_desc')}
                       </Paragraph>
                     </div>
@@ -829,7 +873,7 @@ export default function App() {
                 onChange={setCurrentView}
                 size="large"
                 style={{ 
-                  backgroundColor: '#e2e8f0', 
+                  backgroundColor: isDarkMode ? '#1f1f23' : '#e2e8f0', 
                   padding: '4px',
                   borderRadius: '14px',
                   boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)'
@@ -839,7 +883,11 @@ export default function App() {
             </div>
 
             {/* Toolbar: Search input & Category dropdown selector */}
-            <div className="bg-white border border-slate-100 p-3 sm:p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
+            <div className={`p-3 sm:p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border ${
+              isDarkMode 
+                ? 'bg-zinc-900 border-zinc-800 shadow-none' 
+                : 'bg-white border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.01)]'
+            }`}>
               <Input 
                 placeholder={t('search_placeholder')}
                 prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
@@ -870,7 +918,9 @@ export default function App() {
                         className={`px-3.5 py-1.5 text-xs font-bold rounded-full border transition-all duration-200 cursor-pointer shrink-0 select-none ${
                           isSelected 
                             ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-100' 
-                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                            : isDarkMode
+                              ? 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-700'
+                              : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                         }`}
                       >
                         {cat.label}
@@ -933,11 +983,11 @@ export default function App() {
         </Content>
 
         {/* Footer info */}
-        <Footer style={{ textAlign: 'center', backgroundColor: '#ffffff', borderTop: '1px solid #f1f5f9', padding: '24px' }}>
-          <Text style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>
+        <Footer style={{ textAlign: 'center', backgroundColor: isDarkMode ? '#18181b' : '#ffffff', borderTop: isDarkMode ? '1px solid #27272a' : '1px solid #f1f5f9', padding: '24px' }}>
+          <Text style={{ fontSize: '11px', color: isDarkMode ? '#71717a' : '#94a3b8', fontWeight: 600 }}>
             {t('footer_copyright')}
           </Text>
-          <div style={{ fontSize: '10px', color: '#cbd5e1', marginTop: '4px' }}>
+          <div style={{ fontSize: '10px', color: isDarkMode ? '#52525b' : '#cbd5e1', marginTop: '4px' }}>
             {t('footer_desc')}
           </div>
         </Footer>
@@ -1168,6 +1218,11 @@ export default function App() {
             tooltip={<div>{t('btn_reset_planner')}</div>}
             onClick={handleReset}
             danger
+          />
+          <FloatButton
+            icon={isDarkMode ? <SunOutlined /> : <MoonOutlined />}
+            tooltip={<div>{isDarkMode ? t('theme_light') : t('theme_dark')}</div>}
+            onClick={toggleTheme}
           />
           <FloatButton
             icon={<span style={{ fontWeight: 900, fontSize: '10px' }}>{language === 'th' ? 'EN' : 'TH'}</span>}
